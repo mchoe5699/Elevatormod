@@ -51,10 +51,23 @@ public final class ShowcaseBuilder {
     }
 
     public static Site build(ServerLevel level, BlockPos base, ElevatorType type, int[] usedWidth) {
+        return build(level, base, type, usedWidth, false);
+    }
+
+    public static Site buildVideoReference(ServerLevel level, BlockPos base) {
+        return build(level, base, ElevatorType.PASSENGER, new int[1], true);
+    }
+
+    private static Site build(ServerLevel level, BlockPos base, ElevatorType type, int[] usedWidth, boolean video) {
         ElevatorSettings s = new ElevatorSettings();
         type.applyDefaults(s);
         s.name = type.id();
-        int floors = type == ElevatorType.DOUBLE_DECK ? 4 : 3;
+        if (video) {
+            com.qwerty.elevator.elevator.DesignPreset.VIDEO_CLASSIC.apply(s);
+            s.doorHeight = 2.125f;
+            s.lowestFloorNumber = -1;
+        }
+        int floors = video ? 25 : type == ElevatorType.DOUBLE_DECK ? 4 : 3;
         int spacing = type == ElevatorType.DOUBLE_DECK ? 5 : Math.max(5, (int) Math.ceil(s.carHeight + 1.6));
         boolean pat = type == ElevatorType.PATERNOSTER;
         int doorW = switch (type) {
@@ -136,7 +149,7 @@ public final class ShowcaseBuilder {
                 device(level, ModBlocks.FLOOR_INDICATOR.get(), new BlockPos(dx0, y + doorH, doorZ - 1), ctrlPos);
                 if (doorW > 1) device(level, ModBlocks.HALL_LANTERN.get(), new BlockPos(dx1, y + doorH, doorZ - 1), ctrlPos);
                 if (i == 0) device(level, ModBlocks.CAPACITY_SIGN.get(), new BlockPos(dx0 - 1, y + 1, doorZ - 1), ctrlPos);
-                if (i == 1 && type == ElevatorType.PASSENGER) device(level, ModBlocks.DESTINATION_PANEL.get(), new BlockPos(dx0 - 1, y + 1, doorZ - 1), ctrlPos);
+                if (!video && i == 1 && type == ElevatorType.PASSENGER) device(level, ModBlocks.DESTINATION_PANEL.get(), new BlockPos(dx0 - 1, y + 1, doorZ - 1), ctrlPos);
             }
         }
         // machine room / equipment

@@ -9,6 +9,14 @@ public final class IndicatorDraw {
 
     public static void draw(Draw d, IndicatorStyle style, String name, int dir, boolean moving, float time,
                             double x0, double y0, double x1, double y1, double z, int light, boolean powered) {
+        if (style == IndicatorStyle.LG_SEGMENT) {
+            LgFixtures.indicator(d,name,dir,moving,time,x0,y0,x1,y1,z,light,powered);
+            return;
+        }
+        if (style == IndicatorStyle.VIDEO_AMBER) {
+            VideoFixtures.indicator(d, name, dir, moving, time, x0, y0, x1, y1, z, light, powered);
+            return;
+        }
         double w = x1 - x0, h = y1 - y0;
         int bg = powered ? style.bg : 0x050505;
         if (style.dotMatrix) {
@@ -20,7 +28,7 @@ public final class IndicatorDraw {
         if (!powered) return;
         String text = name == null ? "" : name;
         if (style.dotMatrix && DotMatrix.supports(text)) {
-            String arrow = dir > 0 ? "^" : dir < 0 ? "v" : " ";
+            String arrow = dir > 0 ? "^" : dir < 0 ? "]" : " ";
             int cols = 6 * (text.length() + 1) + 1;
             double dot = Math.min(h / 8.5, w / (cols + 1.0));
             double totalW = (cols - 2) * dot;

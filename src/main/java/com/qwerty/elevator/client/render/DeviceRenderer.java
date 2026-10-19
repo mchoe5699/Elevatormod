@@ -34,8 +34,16 @@ public class DeviceRenderer implements BlockEntityRenderer<DeviceBlockEntity> {
         List<ControllerBlockEntity> ctrls = be.loadedControllers();
         ControllerBlockEntity c = ctrls.isEmpty() ? null : ctrls.get(0);
         int floor = be.clientFloor;
+        if(be.effectiveStyle()!=PanelStyle.VIDEO_CLASSIC && be.effectiveStyle()!=PanelStyle.LG_MGP) {
+            if(kind==DeviceBlock.Kind.HALL_BUTTON)
+                d.box(RenderUtil.sprite("block/panel_stainless"),0xFFFFFFFF,light,
+                        6/16.0,3/16.0,-1/16.0,10/16.0,13/16.0,0);
+            else if(kind==DeviceBlock.Kind.SIGN)
+                d.box(RenderUtil.sprite("block/white_panel"),0xFFFFFFFF,light,
+                        3/16.0,5/16.0,-1/16.0,13/16.0,11/16.0,-.5/16.0);
+        }
         switch (kind) {
-            case HALL_BUTTON -> hallButton(d, be, ctrls, floor, light);
+            case HALL_BUTTON -> hallButton(d, be, ctrls, floor, light, time);
             case HALL_LANTERN -> lantern(d, be, ctrls, light, time);
             case INDICATOR -> indicator(d, be, c, 3 / 16.0, 4 / 16.0, 13 / 16.0, 12 / 16.0, light, time);
             case WIDE_INDICATOR -> wideIndicator(d, be, ctrls, light, time);
@@ -47,7 +55,7 @@ public class DeviceRenderer implements BlockEntityRenderer<DeviceBlockEntity> {
         ps.popPose();
     }
 
-    private void hallButton(Draw d, DeviceBlockEntity be, List<ControllerBlockEntity> ctrls, int floor, int light) {
+    private void hallButton(Draw d, DeviceBlockEntity be, List<ControllerBlockEntity> ctrls, int floor, int light, float time) {
         ButtonLight bl = be.effectiveLight();
         PanelStyle style = be.effectiveStyle();
         boolean up = true, down = true;
@@ -61,6 +69,14 @@ public class DeviceRenderer implements BlockEntityRenderer<DeviceBlockEntity> {
                 upLit |= cc.hasHallCall(f, 1);
                 downLit |= cc.hasHallCall(f, -1);
             }
+        }
+        if (style == PanelStyle.LG_MGP) {
+            LgFixtures.hall(d,ctrls.isEmpty()?null:ctrls.get(0),up,down,upLit,downLit,light,time);
+            return;
+        }
+        if (style == PanelStyle.VIDEO_CLASSIC) {
+            VideoFixtures.hall(d, be, ctrls.isEmpty() ? null : ctrls.get(0), up, down, upLit, downLit, light, time);
+            return;
         }
         double cx = 0.5;
         // faceplate trim
@@ -189,6 +205,10 @@ public class DeviceRenderer implements BlockEntityRenderer<DeviceBlockEntity> {
 
     private void sign(Draw d, DeviceBlockEntity be, ControllerBlockEntity c, int light) {
         double x0 = 3 / 16.0, x1 = 13 / 16.0, y0 = 5 / 16.0, y1 = 11 / 16.0;
+        if (c != null && be.effectiveStyle() == PanelStyle.VIDEO_CLASSIC) {
+            VideoFixtures.capacityPlate(d,.5,.30,.55,c.getSettings(),c.getFloors().size(),light);
+            return;
+        }
         d.color(0xF4F4F0, light, x0 + 0.004, y0 + 0.004, 0.0005, x1 - 0.004, y1 - 0.004, 0.002);
         if (c == null) {
             d.textFit("?", 0.5, 0.5, 0.0025, 0.08, 0.5, 0x202020, light);

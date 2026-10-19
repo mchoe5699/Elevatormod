@@ -43,6 +43,9 @@ public final class ClientAutoTest {
     private static final Deque<Step> STEPS = new ArrayDeque<>();
     private static final List<ShowcaseBuilder.Site> SITES = new ArrayList<>();
     private static BlockPos origin;
+    private static int videoHoldCloseTicks;
+    private static int videoButtonCarId = -1;
+    private static int videoButtonDeadline;
 
     private record Step(String name, int delay, Consumer<MinecraftServer> server, boolean shot, Runnable client) {}
 
@@ -66,6 +69,12 @@ public final class ClientAutoTest {
         if (!ENABLED || event.phase != TickEvent.Phase.END) return;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.getSingleplayerServer() == null) return;
+        if (videoHoldCloseTicks > 0) {
+            videoHoldCloseTicks--;
+            if (videoButtonCarId >= 0)
+                com.qwerty.elevator.network.ModNetwork.sendToServer(new com.qwerty.elevator.network.CarButtonPacket(
+                        videoButtonCarId, com.qwerty.elevator.elevator.CopLayout.ButtonType.CLOSE.ordinal(), -1));
+        }
         ticks++;
         if (ticks > 20 * 60 * 12) {
             ElevatorMod.LOGGER.error("AUTOTEST timeout");
@@ -102,7 +111,7 @@ public final class ClientAutoTest {
             }
         }
         if (step.shot()) {
-            Screenshot.grab(mc.gameDirectory, step.name() + ".png", mc.getMainRenderTarget(), msg -> ElevatorMod.LOGGER.info("AUTOTEST screenshot {}", step.name()));
+            Screenshot.grab(mc.gameDirectory, (Boolean.getBoolean("qwertys_elevator.lgtest") ? step.name().replace("video_", "lg_") : step.name()) + ".png", mc.getMainRenderTarget(), msg -> ElevatorMod.LOGGER.info("AUTOTEST screenshot {}", step.name()));
         }
         wait = step.delay();
     }
@@ -155,6 +164,10 @@ public final class ClientAutoTest {
     }
 
     private static void planSteps() {
+        if (Boolean.getBoolean("qwertys_elevator.videotest")) {
+            planVideoSteps();
+            return;
+        }
         server("build", 160, s -> {
             ServerLevel level = s.overworld();
             level.setDayTime(6000);
@@ -323,6 +336,163 @@ public final class ClientAutoTest {
         });
         shot("31_overview_back", 5);
         logStates("end");
+    }
+
+    private static void videoCheckButtonState(boolean pressed) {
+        var entity=Minecraft.getInstance().level.getEntity(videoButtonCarId);
+        boolean received=entity instanceof com.qwerty.elevator.entity.ElevatorCarEntity car
+                && (pressed?car.getStatus().pressed(com.qwerty.elevator.elevator.CopLayout.ButtonType.CLOSE.ordinal(),-1)
+                           :car.getStatus().pressedType==-1);
+        if(received) return;
+        if(ticks>=videoButtonDeadline) {
+            Minecraft mc=Minecraft.getInstance();
+            ElevatorMod.LOGGER.error("AUTOTEST button diagnostic client entity={} player={} pressed={}",videoButtonCarId,mc.player.position(),
+                    entity instanceof com.qwerty.elevator.entity.ElevatorCarEntity car?car.getStatus().pressedType:-999);
+            mc.getSingleplayerServer().execute(() -> {
+                var server=mc.getSingleplayerServer();
+                var target=server.overworld().getEntity(videoButtonCarId);
+                ElevatorMod.LOGGER.error("AUTOTEST button diagnostic server entity={} player={} box={} inRange={} pressed={}",
+                        videoButtonCarId,player(server).position(),target==null?null:target.getBoundingBox(),
+                        target!=null && target.getBoundingBox().inflate(6).contains(player(server).position()),
+                        target instanceof com.qwerty.elevator.entity.ElevatorCarEntity car?car.getStatus().pressedType:-999);
+            });
+            throw new IllegalStateException("Timed out waiting for reference button " + (pressed?"press":"release") + " acknowledgment");
+        }
+        // Wait for the actual synchronized state rather than assuming a fixed network/frame latency.
+        STEPS.addFirst(new Step(pressed?"video_check_pressed":"video_check_released",1,null,false,
+                () -> videoCheckButtonState(pressed)));
+    }
+
+    private static void videoPanelCamera(MinecraftServer s, double panelY) {
+        ControllerBlockEntity c = ctrl(s, SITES.get(0));
+        var g = c.getGeometry();
+        var m = com.qwerty.elevator.elevator.CopLayout.mounts(c.getSettings(), g, 0).get(0);
+        var local = m.point(m.width() / 2, panelY, .35);
+        var aim = m.point(m.width() / 2, panelY, 0);
+        var anchor = g.anchorAt(c.getPosition());
+        var eye = g.toWorld(anchor, local.x, local.y, local.z);
+        var target = g.toWorld(anchor, aim.x, aim.y, aim.z);
+        var delta = target.subtract(eye);
+        var p = player(s);
+        p.setGameMode(GameType.SPECTATOR);
+        float yaw = (float) Math.toDegrees(Math.atan2(-delta.x, delta.z));
+        float pitch = (float) -Math.toDegrees(Math.atan2(delta.y, Math.hypot(delta.x, delta.z)));
+        look(s, eye.x, eye.y - p.getEyeHeight(), eye.z, yaw, pitch);
+    }
+
+    /** Focused rendering regression for the supplied reference, without running the unrelated showcase. */
+    private static void planVideoSteps() {
+        server("video_build", 120, s -> {
+            ServerPlayer p = player(s);
+            origin = new BlockPos(p.getBlockX() + 6, 110, p.getBlockZ() + 6);
+            SITES.clear();
+            SITES.add(ShowcaseBuilder.buildVideoReference(s.overworld(), origin));
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            var settings = c.getSettings().copy();
+            (Boolean.getBoolean("qwertys_elevator.lgtest") ? com.qwerty.elevator.elevator.DesignPreset.LG_MGP : com.qwerty.elevator.elevator.DesignPreset.VIDEO_CLASSIC).apply(settings);
+            if (Boolean.getBoolean("qwertys_elevator.lgtest")) {
+                settings.lowestFloorNumber = 1;
+            }
+            settings.doorHeight = 2.125f;
+            settings.doorOpenSec = 8;
+            c.applySettings(settings, null, null);
+            c.debugPlaceAt(1, false, true);
+            s.overworld().setDayTime(6000);
+        });
+        inside("video_01_front_indicator", 0, 1, 180, 4, 0.55, -0.15);
+        inside("video_02_mirror_rails", 0, 1, 0, 8, -0.65, 0);
+        inside("video_03_panel", 0, 1, 214, 16, -0.05, 0.2);
+        server("video_hardware_closeup", 18, s -> videoPanelCamera(s, .90));
+        shot("video_10_curved_buttons_closeup", 5);
+        if (!Boolean.getBoolean("qwertys_elevator.lgtest")) server("video_capacity_plate_view", 18, s -> {
+            ControllerBlockEntity c=ctrl(s,SITES.get(0));
+            var g=c.getGeometry();
+            var m=com.qwerty.elevator.elevator.CopLayout.mounts(c.getSettings(),g,0).get(0);
+            var plaque=com.qwerty.elevator.elevator.CopLayout.specificationPlate(c.getSettings(),g,m);
+            videoPanelCamera(s,plaque.bottom()+plaque.width()*.33);
+        });
+        if (!Boolean.getBoolean("qwertys_elevator.lgtest")) shot("video_16_capacity_nameplate", 5);
+        server("video_close_button_view", 18, s -> {
+            videoPanelCamera(s, Boolean.getBoolean("qwertys_elevator.lgtest") ? .10 : .54);
+            // Exercise player input in normal play; spectator closeups are for geometry only.
+            player(s).setGameMode(GameType.CREATIVE);
+            player(s).getAbilities().flying = true;
+            player(s).onUpdateAbilities();
+        });
+        client("video_close_button_hold", 12, () -> {
+            Minecraft mc = Minecraft.getInstance();
+            for (var car : com.qwerty.elevator.entity.CarRegistry.near(mc.level, mc.player.getBoundingBox().inflate(6))) {
+                if (car.getControllerPos().equals(SITES.get(0).controller())) { videoButtonCarId = car.getId(); break; }
+            }
+            if (videoButtonCarId < 0) throw new IllegalStateException("No reference car for button input");
+            videoHoldCloseTicks = 80;
+            videoButtonDeadline = ticks + 60;
+        });
+        client("video_check_pressed", 1, () -> videoCheckButtonState(true));
+        shot("video_11_close_button_pressed", 2);
+        client("video_stop_button_hold", 18, () -> {
+            videoHoldCloseTicks=0;
+            videoButtonDeadline=ticks+60;
+        });
+        client("video_check_released", 1, () -> videoCheckButtonState(false));
+        shot("video_12_close_button_released", 3);
+        server("video_hardware_done", 2, s -> player(s).setGameMode(GameType.CREATIVE));
+        inside("video_04_floor", 0, 1, 0, 65, -0.45, 0);
+        inside("video_05_ceiling", 0, 1, 180, -65, 0.1, 0);
+        server("video_call", 12, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            c.debugPlaceAt(1, false, false);
+            c.registerCarCall(2, null);
+        });
+        server("video_selected_view", 12, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            var site = SITES.get(0);
+            double y = c.getGeometry().anchorAt(c.getPosition()).y;
+            look(s, site.doorCenterX() + 0.20, y + 0.02, site.carCenterZ() - 0.05, 214, 16);
+        });
+        shot("video_06_selected_button", 2);
+        server("video_up_view", 12, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            var site = SITES.get(0);
+            double y = c.getGeometry().anchorAt(c.getPosition()).y;
+            look(s, site.doorCenterX(), y + 0.02, site.carCenterZ() + 0.55, 180, 4);
+            if (c.displayDir() != 1) throw new IllegalStateException("Expected ascending indicator");
+        });
+        shot("video_08_up_indicator", 3);
+        server("video_down", 12, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            c.debugPlaceAt(2, false, false);
+            c.registerCarCall(0, null);
+        });
+        server("video_down_view", 12, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            var site = SITES.get(0);
+            double y = c.getGeometry().anchorAt(c.getPosition()).y;
+            look(s, site.doorCenterX(), y + 0.02, site.carCenterZ() + 0.55, 180, 4);
+            if (c.displayDir() != -1) throw new IllegalStateException("Expected descending indicator");
+        });
+        shot("video_09_down_indicator", 3);
+        server("video_landing", 45, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            c.debugPlaceAt(1, true);
+            var site = SITES.get(0);
+            look(s, site.doorCenterX(), site.floorY(1) + 0.02, site.landingZ() - 2.8, 0, 5);
+        });
+        shot("video_07_landing", 5);
+        server("video_hall_closeup", 12, s -> {
+            var site = SITES.get(0);
+            look(s, site.doorCenterX() + 1.5, site.floorY(1) + .06, site.landingZ() - 1.0, 0, -5);
+        });
+        shot("video_13_hall_fixture_closeup", 5);
+        server("video_hall_oblique_view", 14, s -> {
+            var site=SITES.get(0);
+            look(s,site.doorCenterX()+.90,site.floorY(1)+.06,site.landingZ()-1.40,-24,-4);
+        });
+        shot("video_17_hall_curved_profile", 5);
+        server("video_hall_floor_change", 5, s -> ctrl(s, SITES.get(0)).debugPlaceAt(0, false));
+        shot("video_14_hall_number_transition", 16);
+        shot("video_15_hall_B1", 3);
+        logStates("video_end");
     }
 
     @SuppressWarnings("unused")

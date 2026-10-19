@@ -45,6 +45,8 @@ public class ElevatorCarEntity extends Entity {
     private ElevatorSettings settings = new ElevatorSettings();
     private CarGeometry geometry = new CarGeometry();
     private CarStatus status = new CarStatus();
+    private long clientPressUntil;
+    private int clientPressedType = -1, clientPressedFloor = -1;
 
     /** Path position (server: authoritative; client: predicted). */
     private double s;
@@ -90,6 +92,18 @@ public class ElevatorCarEntity extends Entity {
             refreshBox();
         } else if (STATUS.equals(key)) {
             this.status = CarStatus.load(this.entityData.get(STATUS));
+            if (level().isClientSide) {
+                // Several metadata updates may arrive before one rendered frame. Preserve
+                // a received press long enough for the mechanical depression to be visible.
+                if (status.pressedType >= 0) {
+                    clientPressedType = status.pressedType;
+                    clientPressedFloor = status.pressedFloor;
+                    clientPressUntil = level().getGameTime() + 6;
+                } else if (level().getGameTime() < clientPressUntil) {
+                    status.pressedType = clientPressedType;
+                    status.pressedFloor = clientPressedFloor;
+                }
+            }
         } else if (POS.equals(key) && level().isClientSide) {
             double server = this.entityData.get(POS);
             double err = server - s;
@@ -241,6 +255,10 @@ public class ElevatorCarEntity extends Entity {
     }
 
     private void clientTick() {
+        if (clientPressedType >= 0 && level().getGameTime() >= clientPressUntil) {
+            status.pressedType = status.pressedFloor = -1;
+            clientPressedType = clientPressedFloor = -1;
+        }
         doorF[0] = this.entityData.get(DOOR_F0);
         doorR[0] = this.entityData.get(DOOR_R0);
         doorF[1] = this.entityData.get(DOOR_F1);

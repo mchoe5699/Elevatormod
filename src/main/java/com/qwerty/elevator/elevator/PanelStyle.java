@@ -2,6 +2,8 @@ package com.qwerty.elevator.elevator;
 
 /** Car operating panel (COP) / hall fixture faceplate style. */
 public enum PanelStyle implements Choice {
+    LG_MGP("lg_mgp", 0xA9ACAB, 0xD7DAD8),
+    VIDEO_CLASSIC("video_classic", 0xBCC1BF, 0xECEEEC),
     STAINLESS("stainless", 0xC9CED3, 0xE8ECEF),
     BLACK_GLASS("black_glass", 0x15171A, 0x2A2E33),
     GOLD("gold", 0xC9A64A, 0xE6CB7A),

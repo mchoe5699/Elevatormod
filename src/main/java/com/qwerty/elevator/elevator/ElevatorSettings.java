@@ -32,6 +32,9 @@ public class ElevatorSettings {
     public float doorHeight = 0f;
 
     // 카 디자인
+    /** Video reference: cream panels, narrow mirror, timber rail and tiled floor. */
+    public boolean videoInterior = false;
+    public boolean lgInterior = false;
     public CarShape shape = CarShape.BOX;
     public WallType wallBack = WallType.SOLID;
     public WallType wallLeft = WallType.SOLID;
@@ -143,6 +146,8 @@ public class ElevatorSettings {
         t.putString("door", doorStyle.id());
         t.putFloat("dw", doorWidth);
         t.putFloat("dh", doorHeight);
+        t.putBoolean("videoInterior", videoInterior);
+        t.putBoolean("lgInterior", lgInterior);
         t.putString("shape", shape.id());
         t.putString("wb", wallBack.id());
         t.putString("wl", wallLeft.id());
@@ -203,6 +208,8 @@ public class ElevatorSettings {
         doorStyle = Choice.byId(DoorStyle.class, t.getString("door"), DoorStyle.CENTER_2);
         doorWidth = t.getFloat("dw");
         doorHeight = t.getFloat("dh");
+        videoInterior = t.getBoolean("videoInterior");
+        lgInterior = t.getBoolean("lgInterior");
         shape = Choice.byId(CarShape.class, t.getString("shape"), CarShape.BOX);
         wallBack = Choice.byId(WallType.class, t.getString("wb"), WallType.SOLID);
         wallLeft = Choice.byId(WallType.class, t.getString("wl"), WallType.SOLID);

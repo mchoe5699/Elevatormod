@@ -348,5 +348,13 @@
   "subtitles.qwertys_elevator.motor_run": "권상기 운전",
   "subtitles.qwertys_elevator.brake": "브레이크",
   "subtitles.qwertys_elevator.relay": "릴레이 딸깍",
-  "subtitles.qwertys_elevator.fire_bell": "화재 경보"
+  "subtitles.qwertys_elevator.fire_bell": "화재 경보",
+  "qwertys_elevator.design.video_classic": "영상 커스텀 · 클래식 크림",
+  "qwertys_elevator.panel.video_classic": "영상형 스테인리스 원형 버튼",
+  "qwertys_elevator.indicator.video_amber": "영상형 주황 도트",
+  "gui.qwertys_elevator.apply_video_design": "현대 영상 적용",
+  "qwertys_elevator.design.lg_mgp": "LG MGP 영상 디자인",
+  "qwertys_elevator.panel.lg_mgp": "LG MGP 원형 2열",
+  "qwertys_elevator.indicator.lg_segment": "LG 적색 세그먼트",
+  "gui.qwertys_elevator.apply_lg_design": "LG 영상 적용"
 }

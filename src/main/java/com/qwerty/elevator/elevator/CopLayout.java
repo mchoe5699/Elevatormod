@@ -34,6 +34,17 @@ public final class CopLayout {
         }
     }
 
+    public record SpecificationPlate(double cx,double bottom,double width) {}
+
+    /** Reference plaque is narrower than the COP and lines up with the door-header display. */
+    public static SpecificationPlate specificationPlate(ElevatorSettings s,CarGeometry g,Mount mount) {
+        double width=Math.min(mount.width()*.75,Math.max(.12,g.doorWidth*.11));
+        double height=width*.66;
+        double headerCenter=(Math.min(s.carHeight,g.doorHeight)+s.carHeight)/2;
+        double centerY=Math.min(s.carHeight-.08-height/2,headerCenter+.03);
+        return new SpecificationPlate(.02+width/2,centerY-mount.origin().y-height/2,width);
+    }
+
     public static List<Mount> mounts(ElevatorSettings s, CarGeometry g, int deck) {
         List<Mount> out = new ArrayList<>();
         if (!s.riders || g.paternoster) return out;
@@ -50,18 +61,21 @@ public final class CopLayout {
     }
 
     private static void add(List<Mount> out, ElevatorSettings s, CarGeometry g, List<Integer> floors, CopPosition pos, boolean wide) {
-        double k = Math.min(1.0, Math.max(0.45, (s.carHeight - 0.1) / 2.2));
+        boolean video = s.panelStyle == PanelStyle.VIDEO_CLASSIC;
+        boolean lg = s.panelStyle == PanelStyle.LG_MGP;
+        double k = video ? Math.min(1.0, Math.max(0.25, (s.carHeight - 0.1) / 2.4))
+                : Math.min(1.0, Math.max(0.45, (s.carHeight - 0.1) / 2.2));
         int n = floors.size();
-        int cols = n <= 8 ? 1 : n <= 20 ? 2 : n <= 45 ? 3 : 4;
+        int cols = lg ? 2 : video ? (n <= 8 ? 2 : 3) : n <= 8 ? 1 : n <= 20 ? 2 : n <= 45 ? 3 : 4;
         int rows = Math.max(1, (n + cols - 1) / cols);
-        double gridTop = 1.62 * k, gridBottom = 1.0 * k;
+        double gridTop = 1.62 * k, gridBottom = (lg ? .35 : 1.0) * k;
         double pitchY = Math.min(0.105, (gridTop - gridBottom) / rows);
         double pitchX = Math.min(0.11, pitchY * 1.1 + 0.01);
         double btn = Math.min(0.075, pitchY * 0.72);
         double margin = 0.045;
         double width = Math.max(cols * pitchX + 2 * margin, 2 * 0.1 + 2 * margin);
-        double bottom = 0.74 * k;
-        double top = 1.86 * k;
+        double bottom = (lg ? .12 : video ? 0.30 : 0.74) * k;
+        double top = (lg || video ? 2.35 : 1.86) * k;
         double height = top - bottom;
 
         double halfW = s.carWidth / 2.0;
@@ -115,15 +129,15 @@ public final class CopLayout {
         double gridW = cols * pitchX;
         double gx0 = (width - gridW) / 2 + pitchX / 2;
         for (int i = 0; i < n; i++) {
-            int col = i / rows;
-            int row = i % rows;
+            int col = lg ? (i < n/2 ? 0 : 1) : video ? i % cols : i / rows;
+            int row = lg ? (i < n/2 ? i : i-n/2) : video ? i / cols : i % rows;
             double cx = gx0 + col * pitchX;
             double cy = (gridBottom - bottom) + (row + 0.5) * pitchY;
             buttons.add(new CopButton(ButtonType.FLOOR, floors.get(i), cx, cy, btn));
         }
         double small = Math.min(0.07, btn);
         double c1 = width * 0.3, c2 = width * 0.7;
-        double yOpen = 0.17 * k, yAlarm = 0.06 * k;
+        double yOpen = (lg ? .10 : video ? 0.57 : 0.17) * k, yAlarm = (lg ? 1.65 : video ? 0.43 : 0.06) * k;
         buttons.add(new CopButton(ButtonType.OPEN, -1, c1, yOpen, small));
         buttons.add(new CopButton(ButtonType.CLOSE, -1, c2, yOpen, small));
         buttons.add(new CopButton(ButtonType.ALARM, -1, c1, yAlarm, small));
@@ -132,7 +146,7 @@ public final class CopLayout {
             buttons.add(new CopButton(ButtonType.HOLD, -1, c2, yAlarm, small));
         else buttons.add(new CopButton(ButtonType.PHONE, -1, c2, yAlarm, small));
 
-        double dispY0 = (gridTop - bottom) + 0.03 * k;
+        double dispY0 = lg ? height - .48*k : video ? height - 0.25 * k : (gridTop - bottom) + 0.03 * k;
         double dispY1 = height - 0.03 * k;
         out.add(new Mount(origin, xAxis, normal, width, height, dispY0, dispY1, buttons));
     }

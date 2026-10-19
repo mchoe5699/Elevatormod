@@ -38,6 +38,8 @@ public class ControllerScreen extends BaseScreen {
         this.panelH = 254;
         ControllerBlockEntity c = controller();
         this.s = c != null ? c.getSettings().copy() : new ElevatorSettings();
+        if (s.lgInterior) designPreset = DesignPreset.LG_MGP;
+        else if (s.videoInterior) designPreset = DesignPreset.VIDEO_CLASSIC;
         if (c != null) {
             for (Floor f : c.getFloors()) {
                 names.add(f.name);
@@ -196,6 +198,18 @@ public class ControllerScreen extends BaseScreen {
         });
         label(Component.translatable("gui.qwertys_elevator.custom_hint").withStyle(ChatFormatting.GRAY), x, y + 124, 0x9AA3AA);
         cycle(Component.translatable("gui.qwertys_elevator.light_color"), x, y + 138, 170, () -> Presets.lightName(s.lightColor), d -> { s.lightColor = Presets.cycleLight(s.lightColor, d); mark(); });
+        button(Component.translatable("gui.qwertys_elevator.apply_video_design"), x, y + 180, 83, b -> {
+            designPreset = DesignPreset.VIDEO_CLASSIC;
+            designPreset.apply(s);
+            mark();
+            rebuild();
+        });
+        button(Component.translatable("gui.qwertys_elevator.apply_lg_design"), x + 87, y + 180, 83, b -> {
+            designPreset = DesignPreset.LG_MGP;
+            designPreset.apply(s);
+            mark();
+            rebuild();
+        });
         cycle(Component.translatable("gui.qwertys_elevator.design_preset"), x, y + 160, 170, () -> designPreset.label(), d -> {
             designPreset = Choice.cycle(designPreset, d);
             designPreset.apply(s);

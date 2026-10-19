@@ -99,11 +99,16 @@ public class DeviceBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
+        // These fixtures have style-dependent bodies; a fixed baked body would protrude around them.
+        if (kind == Kind.HALL_BUTTON || kind == Kind.SIGN) return RenderShape.ENTITYBLOCK_ANIMATED;
         return RenderShape.MODEL;
     }
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext ctx) {
+        if (kind == Kind.HALL_BUTTON && level.getBlockEntity(pos) instanceof DeviceBlockEntity be
+                && (be.effectiveStyle() == com.qwerty.elevator.elevator.PanelStyle.VIDEO_CLASSIC || be.effectiveStyle() == com.qwerty.elevator.elevator.PanelStyle.LG_MGP))
+            return box(state.getValue(FACING), 6, 1, 14, 10, 23, 16);
         return kind.shapes[state.getValue(FACING).get2DDataValue()];
     }
 
@@ -134,7 +139,7 @@ public class DeviceBlock extends BaseEntityBlock {
             case HALL_BUTTON -> {
                 if (!level.isClientSide) {
                     double localY = hit.getLocation().y - pos.getY();
-                    int dir = localY >= 0.5 ? 1 : -1;
+                    int dir = localY >= ((be.effectiveStyle() == com.qwerty.elevator.elevator.PanelStyle.VIDEO_CLASSIC || be.effectiveStyle() == com.qwerty.elevator.elevator.PanelStyle.LG_MGP) ? 0.31 : 0.5) ? 1 : -1;
                     be.pressHallButton(player, dir);
                     level.playSound(null, pos, ModSounds.BUTTON.get(), SoundSource.BLOCKS, 0.6f, 1.0f);
                 }

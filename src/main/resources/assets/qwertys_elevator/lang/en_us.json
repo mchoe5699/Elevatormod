@@ -348,5 +348,13 @@
   "subtitles.qwertys_elevator.motor_run": "Motor hum",
   "subtitles.qwertys_elevator.brake": "Brake",
   "subtitles.qwertys_elevator.relay": "Relay click",
-  "subtitles.qwertys_elevator.fire_bell": "Fire bell"
+  "subtitles.qwertys_elevator.fire_bell": "Fire bell",
+  "qwertys_elevator.design.video_classic": "Video custom · Classic cream",
+  "qwertys_elevator.panel.video_classic": "Video stainless / round buttons",
+  "qwertys_elevator.indicator.video_amber": "Video amber dot matrix",
+  "gui.qwertys_elevator.apply_video_design": "Hyundai video",
+  "qwertys_elevator.design.lg_mgp": "LG MGP video reference",
+  "qwertys_elevator.panel.lg_mgp": "LG MGP round two-column",
+  "qwertys_elevator.indicator.lg_segment": "LG red seven-segment",
+  "gui.qwertys_elevator.apply_lg_design": "LG video"
 }

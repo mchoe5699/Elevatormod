@@ -108,6 +108,7 @@ public class ControllerBlockEntity extends BlockEntity {
     private int loadKg;
     private int alarmTicks;
     private int displayStop = -1;
+    private int copPressedType = -1, copPressedFloor = -1, copPressTicks;
     private int lanternStop = -1;
     private int lanternDir;
     private int lanternTicks;
@@ -823,6 +824,7 @@ public class ControllerBlockEntity extends BlockEntity {
 
     private void tickServer() {
         ticker++;
+        if (copPressTicks > 0 && --copPressTicks == 0) copPressedType = copPressedFloor = -1;
         if (geometryDirty) rebuildGeometry();
         if (!geometry.valid()) {
             removeCar();
@@ -1450,6 +1452,8 @@ public class ControllerBlockEntity extends BlockEntity {
         st.mode = mode;
         st.load = loadKg;
         st.doorHold = doorHold;
+        st.pressedType = copPressedType;
+        st.pressedFloor = copPressedFloor;
         st.message = switch (mode) {
             case INSPECTION -> "car.qwertys_elevator.msg.inspection";
             case FIRE_RECALL -> "car.qwertys_elevator.msg.fire_recall";
@@ -1506,6 +1510,9 @@ public class ControllerBlockEntity extends BlockEntity {
     // =================================================================== car buttons (from packets)
 
     public void handleCarButton(Player player, CopLayout.ButtonType type, int floor) {
+        copPressedType = type.ordinal();
+        copPressedFloor = floor;
+        copPressTicks = 6;
         switch (type) {
             case FLOOR -> {
                 if (hasCarCall(floor) && player.isShiftKeyDown()) cancelCarCall(floor);
@@ -1518,6 +1525,8 @@ public class ControllerBlockEntity extends BlockEntity {
             case HOLD -> toggleHold();
             case FIRE -> pressFireButton(player);
         }
+        // Publish transient feedback with the accepted input, before the next simulation tick.
+        if (car != null && !car.isRemoved()) car.pushStatus(buildStatus());
         playAtCar(ModSounds.BUTTON.get(), 0.4f, 1.2f);
     }
 

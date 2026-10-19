@@ -2,6 +2,8 @@ package com.qwerty.elevator.elevator;
 
 /** One-click interior design combinations (카 디자인 프리셋). Everything stays editable afterwards. */
 public enum DesignPreset implements Choice {
+    LG_MGP("lg_mgp", "stainless_hairline", "marble_tile", "stainless_hairline", "stainless_hairline", "stainless_hairline", PanelStyle.LG_MGP, IndicatorStyle.LG_SEGMENT, ButtonLight.RED, 0xF4F5EF),
+    VIDEO_CLASSIC("video_classic", "white_panel", "marble_tile", "white_panel", "stainless_hairline", "stainless_hairline", PanelStyle.VIDEO_CLASSIC, IndicatorStyle.VIDEO_AMBER, ButtonLight.RED, 0xFFF5D9),
     APARTMENT("apartment", "stainless_etching", "terrazzo", "stainless_mirror", "stainless_hairline", "stainless_mirror", PanelStyle.STAINLESS, IndicatorStyle.RED_DOT, ButtonLight.ORANGE, 0xFFF4E0),
     MODERN("modern", "stainless_hairline", "granite_tile", "stainless_mirror", "stainless_hairline", "stainless_mirror", PanelStyle.STAINLESS, IndicatorStyle.BLUE_LCD, ButtonLight.BLUE, 0xF4FAFF),
     LUXURY("luxury", "black_mirror", "marble_tile", "gold_mirror", "gold_mirror", "gold_mirror", PanelStyle.GOLD, IndicatorStyle.BLACK_LCD, ButtonLight.WHITE, 0xFFD9A0),
@@ -37,6 +39,24 @@ public enum DesignPreset implements Choice {
     @Override public String category() { return "design"; }
 
     public void apply(ElevatorSettings s) {
+        s.lgInterior = this == LG_MGP;
+        s.videoInterior = this == VIDEO_CLASSIC;
+        if (s.lgInterior) {
+            s.shape = CarShape.BOX;
+            s.wallBack = s.wallLeft = s.wallRight = WallType.SOLID;
+            s.ceiling = s.handrail = true;
+            s.mirror = s.cctv = false;
+            s.copPosition = CopPosition.FRONT_RIGHT;
+            s.doorStyle = DoorStyle.CENTER_2;
+        }
+        if (s.videoInterior) {
+            s.shape = CarShape.BOX;
+            s.wallBack = s.wallLeft = s.wallRight = WallType.SOLID;
+            s.ceiling = s.handrail = s.mirror = true;
+            s.cctv = false;
+            s.copPosition = CopPosition.FRONT_RIGHT;
+            s.doorStyle = DoorStyle.CENTER_2;
+        }
         String p = "qwertys_elevator:";
         s.matWall = p + wall;
         s.matFloor = p + floor;

@@ -20,6 +20,10 @@ public class CarStatus {
     public String message = "";
     public int load;     // kg
     public boolean doorHold;
+    /** Momentary mechanical depression; floor-call illumination remains independent. */
+    public int pressedType = -1;
+    public int pressedFloor = -1;
+    public boolean pressed(int type, int floor) { return pressedType == type && (type != 0 || pressedFloor == floor); }
 
     public boolean isCalled(int floor) {
         return floor >= 0 && floor < calls.length && calls[floor] != 0;
@@ -39,6 +43,8 @@ public class CarStatus {
         t.putString("msg", message);
         t.putInt("load", load);
         t.putBoolean("hold", doorHold);
+        t.putInt("pressedType", pressedType);
+        t.putInt("pressedFloor", pressedFloor);
         return t;
     }
 
@@ -56,6 +62,8 @@ public class CarStatus {
         s.message = t.getString("msg");
         s.load = t.getInt("load");
         s.doorHold = t.getBoolean("hold");
+        s.pressedType = t.contains("pressedType") ? t.getInt("pressedType") : -1;
+        s.pressedFloor = t.contains("pressedFloor") ? t.getInt("pressedFloor") : -1;
         return s;
     }
 }

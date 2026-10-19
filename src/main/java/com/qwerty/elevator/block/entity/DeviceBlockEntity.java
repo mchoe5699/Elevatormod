@@ -36,6 +36,14 @@ public class DeviceBlockEntity extends BlockEntity {
     // client-side helpers
     public int clientFloor = -1;
     public float blink;
+    public final VideoDisplayState videoDisplay = new VideoDisplayState();
+
+    @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox() {
+        return kind() == DeviceBlock.Kind.HALL_BUTTON && (effectiveStyle() == PanelStyle.VIDEO_CLASSIC || effectiveStyle() == PanelStyle.LG_MGP)
+                ? new net.minecraft.world.phys.AABB(worldPosition).expandTowards(0, 0.5, 0)
+                : super.getRenderBoundingBox();
+    }
 
     public DeviceBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.DEVICE.get(), pos, state);

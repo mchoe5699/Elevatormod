@@ -78,11 +78,11 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
         c.pt = pt;
         c.time = car.tickCount + pt;
         c.lightOn = c.st.light;
-        c.wallSp = RenderUtil.material(s.matWall);
-        c.floorSp = RenderUtil.material(s.matFloor);
-        c.ceilSp = RenderUtil.material(s.matCeiling);
-        c.doorSp = RenderUtil.material(s.matDoor);
-        c.trimSp = RenderUtil.material(s.matTrim);
+        c.wallSp = ((s.videoInterior && s.matWall.equals("qwertys_elevator:white_panel")) || (s.lgInterior && s.matWall.equals("qwertys_elevator:stainless_hairline"))) ? RenderUtil.white() : RenderUtil.material(s.matWall);
+        c.floorSp = s.videoInterior && s.matFloor.equals("qwertys_elevator:marble_tile") ? RenderUtil.white() : RenderUtil.material(s.matFloor);
+        c.ceilSp = s.lgInterior && s.matCeiling.equals("qwertys_elevator:stainless_hairline") ? RenderUtil.white() : RenderUtil.material(s.matCeiling);
+        c.doorSp = (s.videoInterior || s.lgInterior) && s.matDoor.equals("qwertys_elevator:stainless_hairline") ? RenderUtil.white() : RenderUtil.material(s.matDoor);
+        c.trimSp = (s.videoInterior || s.lgInterior) && s.matTrim.equals("qwertys_elevator:stainless_hairline") ? RenderUtil.white() : RenderUtil.material(s.matTrim);
         c.wallGlass = RenderUtil.isTranslucent(s.matWall);
         c.doorGlass = RenderUtil.isTranslucent(s.matDoor);
         c.steelSp = RenderUtil.sprite("block/painted_steel");
@@ -155,6 +155,9 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
         if (round) drawRoundWalls(c);
         else drawBoxWalls(c, roundBack);
 
+        if (s.videoInterior && !round && !roundBack) drawVideoInterior(c);
+        if (s.lgInterior && !round && !roundBack) drawLgInterior(c);
+
         // ---------------- ceiling
         if (s.ceiling) drawCeiling(c, round, roundBack);
 
@@ -199,12 +202,19 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
             jamb(c, l, r, dh, D - T - 0.01, D - T);
         } else {
             wall(c, s.wallBack, -w2 + T, 0, D - T, w2 - T, H, D, 'z', false);
-            if (s.mirror && s.wallBack == WallType.SOLID && H > 1.8) {
+            if (s.mirror && !s.videoInterior && s.wallBack == WallType.SOLID && H > 1.8) {
                 double top = H - 0.3;
                 d(c).boxF(c.mirrorSp, 0xFFE6EEF2, c.li, RenderUtil.NORTH, 0, false, -w2 + 0.25, 0.95, D - T - 0.004, w2 - 0.25, top, D - T);
                 d(c).color(0xA9B2B8, c.li, -w2 + 0.22, 0.92, D - T - 0.003, w2 - 0.22, 0.95, D - T);
                 d(c).color(0xA9B2B8, c.li, -w2 + 0.22, top, D - T - 0.003, w2 - 0.22, top + 0.03, D - T);
             }
+        }
+        if (s.videoInterior && c.g.anyFront && s.doorStyle != DoorStyle.NONE) {
+            double left = c.g.doorU - c.g.doorWidth / 2;
+            double right = c.g.doorU + c.g.doorWidth / 2;
+            double header = Math.min(H, c.g.doorHeight);
+            c.d.color(0xB6B8AC, c.li, left, header, T + 0.001, right, H - 0.06, T + 0.006);
+            VideoMesh.brushedPlate(c.d,left,header,right,H-.06,T+.0062,c.li);
         }
         // front wall with door opening
         if (s.doorStyle == DoorStyle.NONE) {
@@ -223,16 +233,112 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
         jamb(c, l, r, dh, T, T + 0.01);
     }
 
+    private static int wallColor(Ctx c) {
+        return c.s.lgInterior && c.s.matWall.equals("qwertys_elevator:stainless_hairline") ? 0xFFB8BDB9 : c.s.videoInterior && c.s.matWall.equals("qwertys_elevator:white_panel") ? 0xFFE2DCC2 : WHITE;
+    }
+
+    /** Warm wall modules, dark skirting, inset stone tiles and timber handrails from the reference. */
+    private void drawVideoInterior(Ctx c) {
+        Draw d = c.d;
+        double w = c.w2 - T, back = c.depth - T, h = c.height;
+        boolean backSolid = !c.g.anyRear && c.s.wallBack == WallType.SOLID;
+        // Dark border follows the inside perimeter; inset tile joints remain on the floor surface.
+        d.color(0x34332F, c.li, -w, 0.001, T, w, 0.003, T + 0.16);
+        d.color(0x34332F, c.li, -w, 0.001, back - 0.16, w, 0.003, back);
+        for (int side : new int[]{-1, 1}) {
+            double x = side * w;
+            d.color(0x34332F, c.li, Math.min(x, x - side * 0.16), 0.001, T,
+                    Math.max(x, x - side * 0.16), 0.003, back);
+            WallType wall = side < 0 ? c.s.wallLeft : c.s.wallRight;
+            if (wall != WallType.SOLID) continue;
+            d.color(0x383930, c.li, x - 0.008, 0, T, x + 0.008, 0.14, back);
+            for (double z = 0.65; z < back; z += 0.65)
+                d.color(0xB1AA90, c.li, x - 0.009, 0.14, z, x + 0.009, h, z + 0.008);
+            if (c.s.handrail) {
+                double rx = x - side * 0.09;
+                VideoFixtures.handrail(d, new Vec3(rx, 0.94, 0.27), new Vec3(rx, 0.94, back - 0.15), c.li);
+                for (double z : new double[]{0.35, back - 0.23})
+                    d.color(0x9A9B88, c.li, Math.min(rx, x), 0.91, z, Math.max(rx, x), 0.94, z + 0.025);
+            }
+        }
+        for (double x = -w + 0.16; x < w - 0.16; x += 0.55)
+            d.color(0xB8B7AA, c.li, x, 0.004, T + 0.16, x + 0.006, 0.005, back - 0.16);
+        for (double z = T + 0.16; z < back - 0.16; z += 0.55)
+            d.color(0xB8B7AA, c.li, -w + 0.16, 0.004, z, w - 0.16, 0.005, z + 0.006);
+        if (backSolid) {
+            d.color(0x383930, c.li, -w, 0, back - 0.008, w, 0.14, back);
+            for (double x = -w + 0.65; x < w; x += 0.65)
+                d.color(0xB1AA90, c.li, x, 0.14, back - 0.008, x + 0.008, h, back);
+            if (c.s.mirror && h > 1.8) {
+                double mw = Math.min(0.56, w * 0.65), top = h - 0.25;
+                d.color(0x96998C, c.li, -mw / 2 - 0.022, 1.01, back - 0.022, mw / 2 + 0.022, top + 0.022, back - 0.005);
+                d.boxF(c.mirrorSp, 0xFFE4E9E0, c.li, RenderUtil.NORTH, 0, false,
+                        -mw / 2, 1.035, back - 0.024, mw / 2, top, back - 0.023);
+            }
+            if (c.s.handrail) {
+                VideoFixtures.handrail(d, new Vec3(-w + 0.12, 0.94, back - 0.08), new Vec3(w - 0.12, 0.94, back - 0.08), c.li);
+                for (double x : new double[]{-w + 0.2, w - 0.2})
+                    d.color(0x9A9B88, c.li, x, 0.91, back - 0.08, x + 0.025, 0.94, back);
+            }
+        }
+    }
+
+    /** LG reference: bare steel walls and rail; posters and right-wall additions omitted. */
+    private void drawLgInterior(Ctx c) {
+        Draw d=c.d;
+        double w=c.w2-T,back=c.depth-T;
+        boolean steel=c.s.matWall.equals("qwertys_elevator:stainless_hairline");
+        for(int side:new int[]{-1,1}) {
+            double x=side*w;
+            if(steel) {
+                d.ps.pushPose();
+                d.ps.translate(x-side*.001,0,side<0?back:T);
+                d.ps.mulPose(Axis.YP.rotationDegrees(side<0?90:-90));
+                VideoMesh.brushedPlate(d,0,.10,back-T,c.height,0,c.li);
+                d.ps.popPose();
+            }
+            for(double z=.65;z<back;z+=.65)
+                d.color(0x686E6B,c.li,x-.006,.10,z,x+.006,c.height,z+.004);
+            d.color(0x404644,c.li,x-.008,0,T,x+.008,.10,back);
+            if(c.s.handrail) LgFixtures.rail(d,new Vec3(x-side*.08,.90,.28),new Vec3(x-side*.08,.90,back-.15),c.li);
+        }
+        if(!c.g.anyRear && c.s.wallBack==WallType.SOLID) {
+            if(steel) {
+                d.ps.pushPose();
+                d.ps.translate(w,0,back-.001);
+                d.ps.mulPose(Axis.YP.rotationDegrees(180));
+                VideoMesh.brushedPlate(d,0,.10,2*w,c.height,0,c.li);
+                d.ps.popPose();
+            }
+            for(double x=-w+.65;x<w;x+=.65)
+                d.color(0x686E6B,c.li,x,.10,back-.006,x+.004,c.height,back+.006);
+            if(c.s.handrail) LgFixtures.rail(d,new Vec3(-w+.12,.90,back-.08),new Vec3(w-.12,.90,back-.08),c.li);
+        }
+        double tile=.38;
+        for(int ix=0;ix<(int)Math.ceil(2*w/tile);ix++) for(int iz=0;iz<(int)Math.ceil((back-T)/tile);iz++) {
+            double x=-w+ix*tile,z=T+iz*tile;
+            d.color((ix+iz)%2==0?0xC9B88C:0xE5DEC5,c.li,x,.003,z,Math.min(w,x+tile-.004),.005,Math.min(back,z+tile-.004));
+        }
+    }
+
     private static Draw d(Ctx c) { return c.d; }
 
     private void frontSegment(Ctx c, double u0, double u1, double y0, double y1, double d0, double d1) {
         if (u1 - u0 < 1e-3 || y1 - y0 < 1e-3) return;
-        c.d.boxF(c.wallSp, WHITE, c.li, RenderUtil.ALL, 1f, c.wallGlass, u0, y0, d0, u1, y1, d1);
+        c.d.boxF(c.wallSp, wallColor(c), c.li, RenderUtil.ALL, 1f, c.wallGlass, u0, y0, d0, u1, y1, d1);
+        if(c.s.lgInterior && c.s.matWall.equals("qwertys_elevator:stainless_hairline"))
+            VideoMesh.brushedPlate(c.d,u0,y0,u1,y1,d1+.001,c.li);
     }
 
     /** Door frame (jamb + header) around an opening, slightly proud of the wall. */
     private void jamb(Ctx c, double l, double r, double dh, double d0, double d1) {
         double t = 0.035;
+        if(c.s.videoInterior && d0<T+.02) {
+            VideoMesh.plate(c.d,l-t,0,l,dh+t,.003,d1,.004,0xBBC3C2,c.li,true);
+            VideoMesh.plate(c.d,r,0,r+t,dh+t,.003,d1,.004,0xBBC3C2,c.li,true);
+            VideoMesh.plate(c.d,l-t,dh,r+t,dh+t,.003,d1,.004,0xBBC3C2,c.li,true);
+            return;
+        }
         c.d.box(c.trimSp, WHITE, c.li, l - t, 0, d0, l, dh + t, d1);
         c.d.box(c.trimSp, WHITE, c.li, r, 0, d0, r + t, dh + t, d1);
         c.d.box(c.trimSp, WHITE, c.li, l - t, dh, d0, r + t, dh + t, d1);
@@ -248,7 +354,7 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
         double frame = 0.05;
         switch (type) {
             case SOLID -> {
-                d.boxF(c.wallSp, WHITE, c.li, RenderUtil.ALL, 1f, c.wallGlass, x0, y0, z0, x1, y1, z1);
+                d.boxF(c.wallSp, wallColor(c), c.li, RenderUtil.ALL, 1f, c.wallGlass, x0, y0, z0, x1, y1, z1);
                 // kick plate (걸레받이)
                 if (axis == 'x') {
                     double kx0 = minSideIsOutside ? x1 : x0 - 0.006, kx1 = minSideIsOutside ? x1 + 0.006 : x0;
@@ -411,6 +517,21 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
         double end = roundBack ? D - w2 : D;
         d.box(c.ceilSp, WHITE, c.li, -w2, H, 0, w2, H + RT, end);
         if (roundBack) d.cylinder(c.ceilSp, WHITE, c.li, 0, D - w2, w2, H, H + RT, 32, true);
+        if (s.lgInterior) {
+            d.color(0x414441,c.li,-w2+.12,H-.04,.12,w2-.12,H,end-.12);
+            d.color(lightColor,lightLight,-w2+.22,H-.048,.22,w2-.22,H-.04,end-.22);
+            for(double z=.3;z<end-.2;z+=.13)
+                d.color(0xCDD0CB,lightLight,-w2+.23,H-.05,z,w2-.23,H-.048,z+.005);
+            return;
+        }
+        if (s.videoInterior) {
+            for (int side : new int[]{-1, 1}) {
+                double x = side * w2 * 0.70;
+                d.color(0x666459, c.li, x - 0.16, H - 0.025, 0.18, x + 0.16, H, D - 0.18);
+                d.color(lightColor, lightLight, x - 0.12, H - 0.032, 0.22, x + 0.12, H - 0.026, D - 0.22);
+            }
+            return;
+        }
         // light panels
         int nx = Math.max(1, (int) Math.round(s.carWidth / 1.1));
         int nz = Math.max(1, (int) Math.round(D / 1.1));
@@ -480,7 +601,10 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
             if (p.bar()) {
                 d.box(c.steelSp, 0xFFC8CDD2, lightP, x0, y0, Math.min(z0, z1), x1, y1, Math.max(z0, z1));
             } else {
-                d.boxF(c.doorSp, WHITE, lightP, RenderUtil.ALL, 1f, c.doorGlass, x0, y0, Math.min(z0, z1), x1, y1, Math.max(z0, z1));
+                d.boxF(c.doorSp, c.s.videoInterior && c.s.matDoor.equals("qwertys_elevator:stainless_hairline") ? 0xFFD2D2C9 : WHITE, lightP, RenderUtil.ALL, 1f, c.doorGlass, x0, y0, Math.min(z0, z1), x1, y1, Math.max(z0, z1));
+                if(c.s.lgInterior && !rear) LgFixtures.doorPattern(d,x0,y0,x1,y1,Math.max(z0,z1)+.001,c.li);
+                if(c.s.videoInterior && !rear && c.s.matDoor.equals("qwertys_elevator:stainless_hairline"))
+                    VideoMesh.brushedPlate(d,x0,y0,x1,y1,Math.max(z0,z1)+.0008,lightP);
                 // rubber edge at the leading edge
                 d.color(0x1A1A1A, lightP, x1 - 0.008, y0, Math.min(z0, z1) - 0.001, x1, y1, Math.max(z0, z1) + 0.001);
             }
@@ -548,6 +672,12 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
             d.color(plate, c.li, 0, 0, -0.012, W, Hh, 0);
             d.color(hi, c.li, 0.006, 0.006, -0.0005, W - 0.006, Hh - 0.006, 0.0005);
             d.color(plate, c.li, 0.012, 0.012, 0.0, W - 0.012, Hh - 0.012, 0.0012);
+            if (ps == PanelStyle.VIDEO_CLASSIC) {
+                VideoMesh.plate(d, 0.004, 0.004, W - 0.004, Hh - 0.004, 0.016, 0.0013, 0.001, plate, c.li, true);
+                VideoMesh.brushedPlate(d,.012,.012,W-.012,Hh-.012,.0024,c.li);
+                VideoFixtures.intercom(d, W, Hh, m.displayY0(), c.li);
+            }
+            if (ps == PanelStyle.LG_MGP) LgFixtures.cop(d,W,Hh,m.displayY0(),s,c.li);
             // display
             double dx0 = 0.03, dx1 = W - 0.03;
             String name = c.st.display;
@@ -555,14 +685,17 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
                 int[] fl = c.g.stopFloors[c.st.stop];
                 if (deck < fl.length && fl[deck] >= 0 && fl[deck] < c.g.floorNames.length) name = c.g.floorNames[fl[deck]];
             }
-            IndicatorDraw.draw(d, s.indicatorStyle, name, c.st.dir, c.st.moving, c.time,
+            if (ps != PanelStyle.VIDEO_CLASSIC) IndicatorDraw.draw(d, s.indicatorStyle, name, c.st.dir, c.st.moving, c.time,
                     dx0, m.displayY0(), dx1, m.displayY1(), 0.004, c.li, c.lightOn || c.st.moving);
             // capacity text under the display
-            double capY = m.displayY0() - 0.03;
+            double capY = m.displayY0() - (ps == PanelStyle.VIDEO_CLASSIC ? 0.34 : 0.03);
             String cap = s.capacityPersons > 0
                     ? Component.translatable("car.qwertys_elevator.capacity", s.capacityPersons, s.capacityKg).getString()
                     : s.capacityKg + "kg";
-            d.textFit(cap, W / 2, capY, 0.0025, 0.018, W - 0.04, 0x1A1A1A, c.li);
+            if (ps == PanelStyle.VIDEO_CLASSIC) {
+                var plaque = CopLayout.specificationPlate(s,c.g,m);
+                VideoFixtures.capacityPlate(d,plaque.cx(),plaque.bottom(),plaque.width(),s,c.g.floorNames.length,c.li);
+            } else if(ps != PanelStyle.LG_MGP) d.textFit(cap, W / 2, capY, 0.0025, 0.018, W - 0.04, 0x1A1A1A, c.li);
             if (!c.st.message.isEmpty()) {
                 d.textFit(Component.translatable(c.st.message).getString(), W / 2, capY - 0.026, 0.0025, 0.018, W - 0.04,
                         c.st.overload ? 0xD01010 : 0x8A1010, RenderUtil.FULL_BRIGHT);
@@ -586,6 +719,16 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
                     case HOLD -> { label = "H"; on = c.st.doorHold; }
                     case FIRE -> { color = 0xD8302A; label = "F"; on = c.st.mode == ElevatorMode.FIRE_SERVICE; labelColor = 0xFFFFFF; }
                 }
+                if (ps == PanelStyle.LG_MGP) {
+                    boolean pressed=c.st.pressed(b.type().ordinal(),b.floor());
+                    LgFixtures.button(d,b.cx(),b.cy(),b.size(),on||pressed,pressed,label,c.li);
+                    continue;
+                }
+                if (ps == PanelStyle.VIDEO_CLASSIC) {
+                    boolean pressed = c.st.pressed(b.type().ordinal(), b.floor());
+                    VideoFixtures.button(d, b.cx(), b.cy(), b.size(), on || pressed, pressed, lit, label, c.li);
+                    continue;
+                }
                 int face = on ? lit : color;
                 int faceLight = on ? RenderUtil.FULL_BRIGHT : c.li;
                 d.color(hi, c.li, b.cx() - half * 1.18, b.cy() - half * 1.18, 0.0012, b.cx() + half * 1.18, b.cy() + half * 1.18, 0.0035);
@@ -608,12 +751,13 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
 
     private void drawInteriorIndicator(Ctx c, int deck) {
         ElevatorSettings s = c.s;
-        if (!c.g.anyFront || s.doorStyle == DoorStyle.NONE) return;
+        if (s.lgInterior || !c.g.anyFront || s.doorStyle == DoorStyle.NONE) return;
         double dh = Math.min(c.height, c.g.doorHeight);
         double space = c.height - dh;
         if (space < 0.22) return;
         double h = Math.min(0.2, space - 0.08);
-        double w = Math.min(c.g.doorWidth * 0.6, 0.55);
+        double w = Math.min(c.g.doorWidth * (s.indicatorStyle == IndicatorStyle.VIDEO_AMBER ? 0.72 : 0.6), s.indicatorStyle == IndicatorStyle.VIDEO_AMBER ? 1.0 : 0.55);
+        if (s.indicatorStyle == IndicatorStyle.VIDEO_AMBER) h = Math.min(w / 5.3, space - 0.08);
         double cx = c.g.doorU;
         double y0 = dh + (space - h) / 2;
         String name = c.st.display;
@@ -629,6 +773,7 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
     private void drawHandrails(Ctx c, boolean round, boolean roundBack) {
         ElevatorSettings s = c.s;
         if (!s.handrail || round || roundBack) return;
+        if (s.videoInterior || s.lgInterior) return; // matching reference rails are part of drawVideoInterior
         Draw d = c.d;
         double w2 = c.w2, D = c.depth;
         double y = Math.min(0.9, c.height * 0.4);

@@ -2,6 +2,8 @@ package com.qwerty.elevator.elevator;
 
 /** Colour / display technology for floor indicators. */
 public enum IndicatorStyle implements Choice {
+    LG_SEGMENT("lg_segment", 0xF71938, 0x08080B, false),
+    VIDEO_AMBER("video_amber", 0xFF701C, 0x080B16, true),
     RED_DOT("red_dot", 0xFF2A1A, 0x2A0806, true),
     ORANGE_DOT("orange_dot", 0xFF9A1A, 0x2A1806, true),
     GREEN_DOT("green_dot", 0x3CFF4A, 0x062A0A, true),
