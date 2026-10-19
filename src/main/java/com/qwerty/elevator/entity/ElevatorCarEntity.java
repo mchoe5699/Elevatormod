@@ -364,6 +364,18 @@ public class ElevatorCarEntity extends Entity {
     }
 
     @Override
+    public void onAddedToWorld() {
+        super.onAddedToWorld();
+        CarRegistry.add(this);
+    }
+
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+        CarRegistry.remove(this);
+    }
+
+    @Override
     public boolean isPickable() { return false; }
 
     @Override

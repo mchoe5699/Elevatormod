@@ -35,7 +35,7 @@ public final class RiderTracker {
         if (event.phase != TickEvent.Phase.END || event.player.level().isClientSide) return;
         Player player = event.player;
         AABB area = player.getBoundingBox().inflate(4);
-        List<ElevatorCarEntity> cars = player.level().getEntitiesOfClass(ElevatorCarEntity.class, area);
+        List<ElevatorCarEntity> cars = com.qwerty.elevator.entity.CarRegistry.near(player.level(), area);
         for (ElevatorCarEntity car : cars) {
             CarGeometry g = car.getGeometry();
             if (!g.valid()) continue;

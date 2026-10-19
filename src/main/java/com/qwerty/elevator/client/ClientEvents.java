@@ -4,6 +4,7 @@ import com.qwerty.elevator.ElevatorMod;
 import com.qwerty.elevator.elevator.CarCollision;
 import com.qwerty.elevator.elevator.CarGeometry;
 import com.qwerty.elevator.elevator.CopLayout;
+import com.qwerty.elevator.entity.CarRegistry;
 import com.qwerty.elevator.entity.ElevatorCarEntity;
 import com.qwerty.elevator.network.CarButtonPacket;
 import com.qwerty.elevator.network.ModNetwork;
@@ -46,7 +47,7 @@ public final class ClientEvents {
         }
         Level level = player.level();
         long gt = level.getGameTime();
-        List<ElevatorCarEntity> cars = level.getEntitiesOfClass(ElevatorCarEntity.class, mover.getBoundingBox().inflate(3));
+        List<ElevatorCarEntity> cars = CarRegistry.near(level, mover.getBoundingBox().inflate(3));
         for (ElevatorCarEntity car : cars) {
             CarGeometry g = car.getGeometry();
             if (!g.valid()) continue;
@@ -74,7 +75,7 @@ public final class ClientEvents {
         if (mc.hitResult != null && mc.hitResult.getType() == HitResult.Type.BLOCK) {
             blockDist = mc.hitResult.getLocation().distanceTo(eye);
         }
-        List<ElevatorCarEntity> cars = mc.level.getEntitiesOfClass(ElevatorCarEntity.class, p.getBoundingBox().inflate(8));
+        List<ElevatorCarEntity> cars = CarRegistry.near(mc.level, p.getBoundingBox().inflate(8));
         for (ElevatorCarEntity car : cars) {
             CarGeometry g = car.getGeometry();
             if (!g.valid()) continue;
