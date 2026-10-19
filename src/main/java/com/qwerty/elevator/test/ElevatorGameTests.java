@@ -78,7 +78,7 @@ public class ElevatorGameTests {
             LandingDoorBlockEntity master = top.masterEntity();
             if (master == null || master.getOpen() < 0.99f) h.fail("top landing door not open");
             if (!h.getBlockState(new BlockPos(2, LEVELS[2] + 1, 2)).getValue(LandingDoorBlock.OPEN)) h.fail("door block state not open");
-            List<ElevatorCarEntity> cars = h.getLevel().getEntitiesOfClass(ElevatorCarEntity.class, new AABB(h.absolutePos(BlockPos.ZERO)).inflate(40));
+            List<ElevatorCarEntity> cars = h.getLevel().getEntitiesOfClass(ElevatorCarEntity.class, new AABB(h.absolutePos(BlockPos.ZERO), h.absolutePos(new BlockPos(16, 28, 16))));
             if (cars.size() != 1) h.fail("expected one car entity, found " + cars.size());
         });
     }
