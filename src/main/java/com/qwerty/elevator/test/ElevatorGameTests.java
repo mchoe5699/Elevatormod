@@ -35,7 +35,7 @@ public class ElevatorGameTests {
     private static ControllerBlockEntity build(GameTestHelper h, ElevatorType type, int floors) {
         BlockPos ctrlPos = new BlockPos(10, 1, 10);
         h.setBlock(ctrlPos, ModBlocks.CONTROLLER.get().defaultBlockState());
-        ControllerBlockEntity c = h.getBlockEntity(ctrlPos);
+        ControllerBlockEntity c = (ControllerBlockEntity) h.getBlockEntity(ctrlPos);
         ElevatorSettings s = c.getSettings().copy();
         type.applyDefaults(s);
         s.carWidth = 3f;
@@ -59,7 +59,7 @@ public class ElevatorGameTests {
             for (int x = 1; x <= 2; x++) for (int dy = 0; dy < 2; dy++) {
                 LandingDoorBlockEntity.rebuildGroupAround(h.getLevel(), h.absolutePos(new BlockPos(x, y + dy, 2)));
             }
-            LandingDoorBlockEntity door = h.getBlockEntity(new BlockPos(1, y, 2));
+            LandingDoorBlockEntity door = (LandingDoorBlockEntity) h.getBlockEntity(new BlockPos(1, y, 2));
             c.linkLandingDoor(door);
         }
         return c;
@@ -74,7 +74,7 @@ public class ElevatorGameTests {
         });
         h.succeedWhen(() -> {
             if (c.getDisplayStop() != 2) h.fail("car not at top yet: stop " + c.getDisplayStop() + " s=" + c.getPosition());
-            LandingDoorBlockEntity top = h.getBlockEntity(new BlockPos(1, LEVELS[2], 2));
+            LandingDoorBlockEntity top = (LandingDoorBlockEntity) h.getBlockEntity(new BlockPos(1, LEVELS[2], 2));
             LandingDoorBlockEntity master = top.masterEntity();
             if (master == null || master.getOpen() < 0.99f) h.fail("top landing door not open");
             if (!h.getBlockState(new BlockPos(2, LEVELS[2] + 1, 2)).getValue(LandingDoorBlock.OPEN)) h.fail("door block state not open");
