@@ -219,7 +219,7 @@ public final class ClientAutoTest {
             p.onUpdateAbilities();
             p.connection.teleport(a.doorCenterX(), a.floorY(0) + 0.05, a.carCenterZ() + 0.3, 180, 10);
         });
-        client("ride_press", 260, () -> {
+        client("ride_press", 360, () -> {
             Minecraft mc = Minecraft.getInstance();
             for (com.qwerty.elevator.entity.ElevatorCarEntity car : com.qwerty.elevator.entity.CarRegistry.near(mc.level, mc.player.getBoundingBox().inflate(6))) {
                 com.qwerty.elevator.network.ModNetwork.sendToServer(new com.qwerty.elevator.network.CarButtonPacket(car.getId(),
