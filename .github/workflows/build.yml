@@ -20,12 +20,12 @@ jobs:
       - name: Build
         run: |
           chmod +x gradlew
-          ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log
+          ./gradlew build --no-daemon 2>&1 | tee build.log
           exit ${PIPESTATUS[0]}
       - name: Report build errors
         if: failure()
         run: |
-          grep -E "error:|FAILURE|What went wrong|Exception|Could not" -A4 build.log | head -c 50000 > errors.txt || true
+          grep -E "error:|What went wrong|Could not" -A4 build.log | head -c 50000 > errors.txt || true
           if [ ! -s errors.txt ]; then tail -c 30000 build.log > errors.txt; fi
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' errors.txt)
           echo "::error title=Build errors::$msg"

@@ -37,19 +37,18 @@ public class DeviceBlock extends BaseEntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public enum Kind {
-        HALL_BUTTON(6, 3, 10, 13),
-        HALL_LANTERN(2, 10, 14, 15),
-        INDICATOR(2, 3, 14, 13),
-        WIDE_INDICATOR(0, 4, 16, 12),
-        DESTINATION(3, 2, 13, 14),
-        FIRE_SWITCH(5, 5, 11, 11),
-        PIT_STOP(5, 4, 11, 12),
-        SIGN(3, 5, 13, 11);
+        HALL_BUTTON(6, 3, 10, 13, 15),
+        HALL_LANTERN(2, 10, 14, 15, 15),
+        INDICATOR(2, 3, 14, 13, 15),
+        WIDE_INDICATOR(0, 4, 16, 12, 14),
+        DESTINATION(3, 2, 13, 14, 15),
+        FIRE_SWITCH(5, 5, 11, 11, 15),
+        PIT_STOP(5, 4, 11, 12, 14),
+        SIGN(3, 5, 13, 11, 15);
 
         final VoxelShape[] shapes = new VoxelShape[4];
 
-        Kind(double x0, double y0, double x1, double y1) {
-            double depth = this == PIT_STOP || this == WIDE_INDICATOR ? 14 : 15;
+        Kind(double x0, double y0, double x1, double y1, double depth) {
             for (Direction d : Direction.Plane.HORIZONTAL) {
                 shapes[d.get2DDataValue()] = box(d, x0, y0, depth, x1, y1, 16);
             }
