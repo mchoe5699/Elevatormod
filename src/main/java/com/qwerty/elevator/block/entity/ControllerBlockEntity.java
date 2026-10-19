@@ -1392,6 +1392,15 @@ public class ControllerBlockEntity extends BlockEntity {
 
     private void updateLandingDoors() {
         Set<BlockPos> active = new HashSet<>();
+        if (geometry.paternoster) {
+            // paternoster landings are open entrances: keep them passable
+            for (Floor fo : floors) {
+                for (BlockPos p : new BlockPos[]{fo.front, fo.rear}) {
+                    if (p != null && level.getBlockEntity(p) instanceof LandingDoorBlockEntity d) d.setOpen(1f);
+                }
+            }
+            return;
+        }
         if (!geometry.paternoster && currentStop >= 0 && phase != Phase.MOVING && door > 0) {
             int[] fl = geometry.stopFloors[currentStop];
             for (int deck = 0; deck < fl.length && deck < 2; deck++) {
