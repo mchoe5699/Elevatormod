@@ -87,6 +87,12 @@ public class ControllerScreen extends BaseScreen {
         });
     }
 
+    /** Used by the screenshot test. */
+    public void showTab(int t) {
+        tab = Math.max(0, Math.min(TABS.length - 1, t));
+        rebuild();
+    }
+
     private void apply() {
         s.clamp();
         ModNetwork.sendToServer(new ControllerSettingsPacket(pos, s.save(), new ArrayList<>(names), new ArrayList<>(service)));

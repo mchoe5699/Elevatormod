@@ -44,7 +44,7 @@ public final class ClientAutoTest {
     private static final List<ShowcaseBuilder.Site> SITES = new ArrayList<>();
     private static BlockPos origin;
 
-    private record Step(String name, int delay, Consumer<MinecraftServer> server, boolean shot) {}
+    private record Step(String name, int delay, Consumer<MinecraftServer> server, boolean shot, Runnable client) {}
 
     private ClientAutoTest() {}
 
@@ -94,6 +94,13 @@ public final class ClientAutoTest {
                 }
             });
         }
+        if (step.client() != null) {
+            try {
+                step.client().run();
+            } catch (Throwable t) {
+                ElevatorMod.LOGGER.error("AUTOTEST client step {} failed", step.name(), t);
+            }
+        }
         if (step.shot()) {
             Screenshot.grab(mc.gameDirectory, step.name() + ".png", mc.getMainRenderTarget(), msg -> ElevatorMod.LOGGER.info("AUTOTEST screenshot {}", step.name()));
         }
@@ -112,11 +119,15 @@ public final class ClientAutoTest {
     }
 
     private static void server(String name, int delay, Consumer<MinecraftServer> action) {
-        STEPS.add(new Step(name, delay, action, false));
+        STEPS.add(new Step(name, delay, action, false, null));
     }
 
     private static void shot(String name, int delayAfter) {
-        STEPS.add(new Step(name, delayAfter, null, true));
+        STEPS.add(new Step(name, delayAfter, null, true, null));
+    }
+
+    private static void client(String name, int delay, Runnable action) {
+        STEPS.add(new Step(name, delay, null, false, action));
     }
 
     private static ControllerBlockEntity ctrl(MinecraftServer s, ShowcaseBuilder.Site site) {
@@ -165,6 +176,37 @@ public final class ClientAutoTest {
         inside("03_car_front", 0, 1, 180, 8, 0.5, -0.2);
         inside("04_car_back", 0, 1, 0, 5, -0.6, 0);
         inside("05_car_cop", 0, 1, 155, 30, -0.1, 0.5);
+        // press the "3" button on the car operating panel through the real network path
+        client("press_cop", 60, () -> {
+            Minecraft mc = Minecraft.getInstance();
+            for (com.qwerty.elevator.entity.ElevatorCarEntity car : com.qwerty.elevator.entity.CarRegistry.near(mc.level, mc.player.getBoundingBox().inflate(6))) {
+                com.qwerty.elevator.network.ModNetwork.sendToServer(new com.qwerty.elevator.network.CarButtonPacket(car.getId(),
+                        com.qwerty.elevator.elevator.CopLayout.ButtonType.FLOOR.ordinal(), 2));
+                ElevatorMod.LOGGER.info("AUTOTEST pressed COP button in car {}", car.getId());
+                break;
+            }
+        });
+        server("log_after_cop", 2, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            if (c != null) ElevatorMod.LOGGER.info("AUTOTEST [after COP press] {}", c.debugState());
+        });
+        server("park_again", 40, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            if (c != null) c.debugPlaceAt(1, true);
+        });
+        // controller GUI tabs
+        for (int t = 0; t < 7; t++) {
+            final int tab = t;
+            client("gui_tab_" + t, 15, () -> {
+                Minecraft mc = Minecraft.getInstance();
+                if (!(mc.screen instanceof com.qwerty.elevator.client.screen.ControllerScreen)) {
+                    mc.setScreen(new com.qwerty.elevator.client.screen.ControllerScreen(SITES.get(0).controller()));
+                }
+                if (mc.screen instanceof com.qwerty.elevator.client.screen.ControllerScreen cs) cs.showTab(tab);
+            });
+            shot("40_gui_tab_" + t, 5);
+        }
+        client("gui_close", 10, () -> Minecraft.getInstance().setScreen(null));
         server("tp_hoistway", 50, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
             look(s, a.doorCenterX() - 4.6, a.floorY(1) - 0.5, a.carCenterZ() + 0.4, -90, 0);

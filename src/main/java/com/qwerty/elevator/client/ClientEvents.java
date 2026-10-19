@@ -85,7 +85,7 @@ public final class ClientEvents {
                 List<CopLayout.Mount> mounts = CopLayout.mounts(car.getSettings(), g, cabin.deck());
                 double reach = Math.min(4.0, blockDist + 0.05);
                 CopLayout.CopButton b = CopLayout.hit(mounts, from, dir, reach);
-                if (b != null && !p.isShiftKeyDown()) {
+                if (b != null) {
                     ModNetwork.sendToServer(new CarButtonPacket(car.getId(), b.type().ordinal(), b.floor()));
                     event.setCanceled(true);
                     event.setSwingHand(true);
