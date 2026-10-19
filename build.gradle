@@ -31,6 +31,10 @@ minecraft {
         }
         client {
             property 'forge.enabledGameTestNamespaces', mod_id
+            if (project.hasProperty('autotest')) {
+                property 'qwertys_elevator.autotest', 'true'
+                args '--width', '1280', '--height', '720'
+            }
         }
         server {
             property 'forge.enabledGameTestNamespaces', mod_id

@@ -18,6 +18,7 @@ jobs:
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
       - name: Build
+        id: build
         run: |
           chmod +x gradlew
           ./gradlew build --no-daemon 2>&1 | tee build.log
@@ -46,7 +47,8 @@ jobs:
           files: build/libs/*.jar
           prerelease: true
       - name: Game tests
-        if: success()
+        id: gametest
+        if: always() && steps.build.outcome == 'success'
         run: |
           set +e
           timeout 1500 ./gradlew runGameTestServer --no-daemon > gametest.log 2>&1
@@ -55,3 +57,28 @@ jobs:
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' gt.txt)
           if [ $code -ne 0 ]; then echo "::error title=Game tests::exit $code%0A$msg"; else echo "::notice title=Game tests::$msg"; fi
           exit $code
+      - name: Client screenshots
+        if: always() && steps.build.outcome == 'success'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-utils > /dev/null 2>&1
+          mkdir -p run
+          printf "onboardAccessibility:false\ntutorialStep:none\nskipMultiplayerWarning:true\njoinedFirstServer:true\nrenderDistance:5\nsimulationDistance:5\nguiScale:2\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nfov:0.15\n" > run/options.txt
+          export LIBGL_ALWAYS_SOFTWARE=1
+          set +e
+          timeout 1800 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient --no-daemon -Pautotest=true > client.log 2>&1
+          echo "exit $?"
+          ls run/screenshots || true
+          grep -E "AUTOTEST|Exception|ERROR|Caused by|at com.qwerty|Reported exception" client.log | head -c 45000 > ct.txt
+          msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' ct.txt)
+          echo "::notice title=Client run::$msg"
+          tail -c 15000 client.log > ctail.txt
+          msg2=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' ctail.txt)
+          echo "::notice title=Client tail::$msg2"
+      - name: Publish screenshots
+        if: always() && steps.build.outcome == 'success' && hashFiles('run/screenshots/*.png') != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: screens-${{ github.run_number }}
+          name: Screenshots ${{ github.run_number }}
+          files: run/screenshots/*.png
+          prerelease: true
