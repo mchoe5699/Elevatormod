@@ -162,6 +162,54 @@ public final class ShowcaseBuilder {
         return new Site(ctrlPos, floors, levels, doorCenter, doorZ, doorZ + 1.03 + s.carDepth / 2, machineY);
     }
 
+    /**
+     * 경사형: a car running along a slope between a lower station (front door, facing north) and an upper
+     * station (rear door, facing south). Returns the site; floor 0 is the lower and floor 1 the upper station.
+     */
+    public static Site buildInclined(ServerLevel level, BlockPos base, int run, int rise) {
+        ElevatorSettings s = new ElevatorSettings();
+        ElevatorType.INCLINED.applyDefaults(s);
+        s.name = "inclined";
+        s.carWidth = 2.5f;
+        s.carDepth = 2.5f;
+        s.carHeight = 2.75f;
+        s.speedMpm = 60;
+        int bx = base.getX(), by = base.getY(), bz = base.getZ();
+        int doorW = 2, doorH = 2;
+        int dx0 = bx + 1, dx1 = bx + doorW;
+        int lowDoorZ = bz + 2;
+        int topDoorZ = lowDoorZ + 1 + (int) Math.ceil(s.carDepth + 0.1) + run;
+        int topY = by + rise;
+        BlockState floor = Blocks.SMOOTH_STONE.defaultBlockState();
+        BlockState brick = Blocks.STONE_BRICKS.defaultBlockState();
+        for (int x = bx - 2; x <= bx + doorW + 3; x++) {
+            for (int z = bz - 4; z < lowDoorZ; z++) set(level, x, by - 1, z, floor);
+            for (int z = topDoorZ + 1; z <= topDoorZ + 5; z++) set(level, x, topY - 1, z, floor);
+            for (int h = -1; h <= doorH; h++) {
+                set(level, x, by + h, lowDoorZ, brick);
+                set(level, x, topY + h, topDoorZ, brick);
+            }
+        }
+        BlockPos ctrlPos = new BlockPos(bx + doorW + 2, by, lowDoorZ - 1);
+        level.setBlock(ctrlPos, ModBlocks.CONTROLLER.get().defaultBlockState().setValue(com.qwerty.elevator.block.ControllerBlock.FACING, Direction.NORTH), 3);
+        ControllerBlockEntity c = (ControllerBlockEntity) level.getBlockEntity(ctrlPos);
+        if (c == null) throw new IllegalStateException("controller missing");
+        for (int x = dx0; x <= dx1; x++) for (int h = 0; h < doorH; h++) {
+            set(level, x, by + h, lowDoorZ, ModBlocks.LANDING_DOOR.get().defaultBlockState().setValue(LandingDoorBlock.FACING, Direction.NORTH));
+            set(level, x, topY + h, topDoorZ, ModBlocks.LANDING_DOOR.get().defaultBlockState().setValue(LandingDoorBlock.FACING, Direction.SOUTH));
+        }
+        for (int x = dx0; x <= dx1; x++) for (int h = 0; h < doorH; h++) {
+            LandingDoorBlockEntity.rebuildGroupAround(level, new BlockPos(x, by + h, lowDoorZ));
+            LandingDoorBlockEntity.rebuildGroupAround(level, new BlockPos(x, topY + h, topDoorZ));
+        }
+        c.applySettings(s.copy(), null, null);
+        if (level.getBlockEntity(new BlockPos(dx0, by, lowDoorZ)) instanceof LandingDoorBlockEntity d) c.linkLandingDoor(d);
+        if (level.getBlockEntity(new BlockPos(dx1, topY, topDoorZ)) instanceof LandingDoorBlockEntity d) c.linkLandingDoor(d);
+        device(level, ModBlocks.HALL_BUTTON.get(), new BlockPos(dx1 + 1, by + 1, lowDoorZ - 1), ctrlPos);
+        double doorCenter = bx + 1 + doorW / 2.0;
+        return new Site(ctrlPos, 2, new int[]{by, topY}, doorCenter, lowDoorZ, lowDoorZ + 1.03 + s.carDepth / 2, topY + 4);
+    }
+
     private static void device(ServerLevel level, Block block, BlockPos pos, BlockPos ctrl) {
         level.setBlock(pos, block.defaultBlockState().setValue(DeviceBlock.FACING, Direction.NORTH), 3);
         if (level.getBlockEntity(pos) instanceof DeviceBlockEntity d) d.link(ctrl);

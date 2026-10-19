@@ -203,6 +203,40 @@ public final class ClientAutoTest {
                 inside(String.format("%02d_%s_back", 10 + i, id), idx, 1, 0, 5, -0.3, 0);
             }
         }
+        // inclined elevator on its own slope
+        final ShowcaseBuilder.Site[] incl = new ShowcaseBuilder.Site[1];
+        server("build_inclined", 80, s -> {
+            ShowcaseBuilder.Site first = SITES.get(0);
+            BlockPos at = new BlockPos((int) first.doorCenterX() - 30, first.floorY(0), first.landingZ() + 40);
+            incl[0] = ShowcaseBuilder.buildInclined(s.overworld(), at, 10, 7);
+        });
+        server("inclined_place", 40, s -> {
+            ControllerBlockEntity c = (ControllerBlockEntity) s.overworld().getBlockEntity(incl[0].controller());
+            if (c != null) { c.debugPlaceAt(0, true); ElevatorMod.LOGGER.info("AUTOTEST [inclined] {}", c.debugState()); }
+        });
+        server("tp_inclined_side", 60, s -> {
+            ShowcaseBuilder.Site a = incl[0];
+            look(s, a.doorCenterX() - 12, a.floorY(0) + 5, a.landingZ() + 9, -90, 15);
+        });
+        shot("25_inclined_side", 5);
+        server("tp_inclined_landing", 60, s -> {
+            ShowcaseBuilder.Site a = incl[0];
+            look(s, a.doorCenterX() + 0.5, a.floorY(0) + 0.02, a.landingZ() - 3.4, 10, 5);
+        });
+        shot("26_inclined_landing", 5);
+        server("inclined_go", 2, s -> {
+            ControllerBlockEntity c = (ControllerBlockEntity) s.overworld().getBlockEntity(incl[0].controller());
+            if (c != null) { c.debugPlaceAt(0, false); c.registerCarCall(1, null); }
+        });
+        server("tp_inclined_moving", 120, s -> {
+            ShowcaseBuilder.Site a = incl[0];
+            look(s, a.doorCenterX() - 12, a.floorY(0) + 5, a.landingZ() + 9, -90, 15);
+        });
+        server("inclined_log", 2, s -> {
+            ControllerBlockEntity c = (ControllerBlockEntity) s.overworld().getBlockEntity(incl[0].controller());
+            if (c != null) ElevatorMod.LOGGER.info("AUTOTEST [inclined moving] {}", c.debugState());
+        });
+        shot("27_inclined_moving", 5);
         server("tp_overview", 70, s -> {
             ShowcaseBuilder.Site first = SITES.get(0);
             ShowcaseBuilder.Site last = SITES.get(SITES.size() - 1);
