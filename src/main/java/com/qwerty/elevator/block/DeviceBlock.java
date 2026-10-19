@@ -67,12 +67,11 @@ public class DeviceBlock extends BaseEntityBlock {
      * Rotates a box given for a block facing NORTH (front at z=0, wall/back at z=16) to the given facing.
      */
     public static VoxelShape box(Direction facing, double x0, double y0, double z0, double x1, double y1, double z1) {
-        return switch (facing) {
-            case SOUTH -> Block.box(16 - x1, y0, 16 - z1, 16 - x0, y1, 16 - z0);
-            case EAST -> Block.box(16 - z1, y0, x0, 16 - z0, y1, x1);
-            case WEST -> Block.box(z0, y0, 16 - x1, z1, y1, 16 - x0);
-            default -> Block.box(x0, y0, z0, x1, y1, z1);
-        };
+        // no enum switch here: this runs during class initialisation of the Kind enum
+        if (facing == Direction.SOUTH) return Block.box(16 - x1, y0, 16 - z1, 16 - x0, y1, 16 - z0);
+        if (facing == Direction.EAST) return Block.box(16 - z1, y0, x0, 16 - z0, y1, x1);
+        if (facing == Direction.WEST) return Block.box(z0, y0, 16 - x1, z1, y1, 16 - x0);
+        return Block.box(x0, y0, z0, x1, y1, z1);
     }
 
     @Override
