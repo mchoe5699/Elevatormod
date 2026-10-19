@@ -69,7 +69,7 @@ jobs:
           timeout 1800 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient --no-daemon -Pautotest=true > client.log 2>&1
           echo "exit $?"
           ls run/screenshots || true
-          grep -E "AUTOTEST|Exception|ERROR|Caused by|at com.qwerty|Reported exception" client.log | grep -vE "Narrator|flite|setAccessible|netty|Suppressed|IllegalAccessException|at jdk|at java" | head -c 45000 > ct.txt
+          { grep -E "AUTOTEST \[(after|ride|inclined)|AUTOTEST pressed|failed|Exception|Caused by|at com.qwerty|Reported exception" client.log | grep -vE "Narrator|flite|setAccessible|netty|Suppressed|IllegalAccessException|at jdk|at java|OpenAL|Realms|server.properties"; grep -E "AUTOTEST" client.log | grep -vE "screenshot|\[(built|moving|parked|end)\]"; } | head -c 45000 > ct.txt
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' ct.txt)
           echo "::notice title=Client run::$msg"
           tail -c 15000 client.log > ctail.txt
