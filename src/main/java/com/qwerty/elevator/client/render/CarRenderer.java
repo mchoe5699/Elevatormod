@@ -702,8 +702,8 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
             }
             // buffer striker plates
             d.color(0x30353A, le, -0.25, -FT - 0.3, mid - 0.15, 0.25, -FT - 0.26, mid + 0.15);
-            // traveling cable hanger
-            d.color(DARK, le, -w2 / 2 - 0.05, -FT - 0.18, D - 0.35, -w2 / 2 + 0.05, -FT, D - 0.25);
+            // traveling cable hanger on the left side of the platform
+            d.color(DARK, le, -w2 - 0.16, -FT - 0.2, D * 0.7 - 0.05, -w2, -FT - 0.12, D * 0.7 + 0.05);
         }
         if (top && !platform) {
             double y0 = H + RT;
@@ -889,29 +889,27 @@ public class CarRenderer extends EntityRenderer<ElevatorCarEntity> {
             d.color(DARK, le, w2 + 0.1, carY + 0.4, gz - 0.03, gx + 0.02, carY + 0.48, gz + 0.03);
         }
 
-        // ---- traveling cable (이동 케이블)
+        // ---- traveling cable (이동 케이블): hangs in a loop beside the car, fixed half way up the hoistway
         {
             double midY = (g.maxAnchorY() - g.minAnchorY()) / 2.0 + 0.5;
-            double cx0 = -w2 / 2, cz = D - 0.3;
+            double cx = -w2 - 0.12;
+            double z1 = D * 0.7, r = 0.22, z2 = z1 - 2 * r;
             double cableLen = range / 2.0 + 2.0;
             double attach = carY - FT - 0.18;
             double bottomLoop = (attach + midY - cableLen) / 2.0;
             bottomLoop = Math.max(minY + 0.3, Math.min(Math.min(attach, midY) - 0.3, bottomLoop));
             TextureAtlasSprite cab = RenderUtil.sprite("block/traveling_cable");
-            double r = 0.22;
-            Vec3 a = new Vec3(cx0, attach, cz), b = new Vec3(cx0, bottomLoop + r, cz);
-            Vec3 e = new Vec3(cx0 + 2 * r, bottomLoop + r, cz + 0.02), f2 = new Vec3(cx0 + 2 * r, midY, cz + 0.02);
-            d.beam(cab, WHITE, le, a, b, 0.05, 1f);
+            d.beam(cab, WHITE, le, new Vec3(cx, attach, z1), new Vec3(cx, bottomLoop + r, z1), 0.05, 1f);
+            Vec3 prev = new Vec3(cx, bottomLoop + r, z1);
             int seg = 6;
-            Vec3 prev = b;
             for (int i = 1; i <= seg; i++) {
-                double ang = Math.PI + Math.PI * i / seg;
-                Vec3 p = new Vec3(cx0 + r + Math.cos(ang) * r, bottomLoop + r + Math.sin(ang) * r, cz + 0.02 * i / seg);
+                double ang = Math.PI * i / seg;
+                Vec3 p = new Vec3(cx, bottomLoop + r - Math.sin(ang) * r, z1 - r + Math.cos(ang) * r);
                 d.beam(cab, WHITE, le, prev, p, 0.05, 1f);
                 prev = p;
             }
-            d.beam(cab, WHITE, le, e, f2, 0.05, 1f);
-            d.color(0x5A646C, le, cx0 + 2 * r - 0.08, midY, cz - 0.05, cx0 + 2 * r + 0.08, midY + 0.2, cz + 0.1);
+            d.beam(cab, WHITE, le, new Vec3(cx, bottomLoop + r, z2), new Vec3(cx, midY, z2), 0.05, 1f);
+            d.color(0x5A646C, le, cx - 0.06, midY, z2 - 0.1, cx + 0.06, midY + 0.22, z2 + 0.1);
         }
 
         // ---- drive specific

@@ -159,7 +159,7 @@ public final class ClientAutoTest {
             look(s, a.doorCenterX(), a.floorY(1) + 0.02, a.landingZ() - 3.2, 0, 8);
         });
         shot("01_landing_closed", 5);
-        server("park_floor1_open", 60, s -> forAll(s, c -> c.debugPlaceAt(Math.min(1, c.getGeometry().stopCount() - 1), true)));
+        server("park_floor1_open", 60, s -> forAll(s, c -> c.debugPlaceAt(c.getGeometry().decks > 1 ? 0 : Math.min(1, c.getGeometry().stopCount() - 1), true)));
         logStates("parked");
         shot("02_landing_open", 5);
         inside("03_car_front", 0, 1, 180, 8, 0.5, -0.2);
