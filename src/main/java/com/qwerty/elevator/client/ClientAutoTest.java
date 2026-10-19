@@ -207,6 +207,35 @@ public final class ClientAutoTest {
             shot("40_gui_tab_" + t, 5);
         }
         client("gui_close", 10, () -> Minecraft.getInstance().setScreen(null));
+        // ride test: stand in the car, press 3, check the player arrives with the car
+        server("ride_prepare", 30, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            if (c != null) c.debugPlaceAt(0, true);
+        });
+        server("ride_enter", 40, s -> {
+            ShowcaseBuilder.Site a = SITES.get(0);
+            ServerPlayer p = player(s);
+            p.getAbilities().flying = false;
+            p.onUpdateAbilities();
+            p.connection.teleport(a.doorCenterX(), a.floorY(0) + 0.05, a.carCenterZ() + 0.3, 180, 10);
+        });
+        client("ride_press", 260, () -> {
+            Minecraft mc = Minecraft.getInstance();
+            for (com.qwerty.elevator.entity.ElevatorCarEntity car : com.qwerty.elevator.entity.CarRegistry.near(mc.level, mc.player.getBoundingBox().inflate(6))) {
+                com.qwerty.elevator.network.ModNetwork.sendToServer(new com.qwerty.elevator.network.CarButtonPacket(car.getId(),
+                        com.qwerty.elevator.elevator.CopLayout.ButtonType.FLOOR.ordinal(), 2));
+                break;
+            }
+        });
+        client("ride_check_client", 2, () -> {
+            Minecraft mc = Minecraft.getInstance();
+            ElevatorMod.LOGGER.info("AUTOTEST [ride] client player y={} expected floor y={}", mc.player.getY(), SITES.get(0).floorY(2));
+        });
+        server("ride_check_server", 2, s -> {
+            ControllerBlockEntity c = ctrl(s, SITES.get(0));
+            ElevatorMod.LOGGER.info("AUTOTEST [ride] server player y={} {}", player(s).getY(), c == null ? "" : c.debugState());
+        });
+        shot("10_ride_arrived", 5);
         server("tp_hoistway", 50, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
             look(s, a.doorCenterX() - 4.6, a.floorY(1) - 0.5, a.carCenterZ() + 0.4, -90, 0);
