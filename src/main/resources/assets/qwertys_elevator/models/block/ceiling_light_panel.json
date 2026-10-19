@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "qwertys_elevator:block/ceiling_light_panel"
+  }
+}

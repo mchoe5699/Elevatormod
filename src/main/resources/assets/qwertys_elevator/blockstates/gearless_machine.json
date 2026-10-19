@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "qwertys_elevator:block/gearless_machine"
+    },
+    "facing=east": {
+      "model": "qwertys_elevator:block/gearless_machine",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "qwertys_elevator:block/gearless_machine",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "qwertys_elevator:block/gearless_machine",
+      "y": 270
+    }
+  }
+}

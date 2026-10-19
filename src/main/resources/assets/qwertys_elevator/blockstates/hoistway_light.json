@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "qwertys_elevator:block/hoistway_light"
+    },
+    "facing=east": {
+      "model": "qwertys_elevator:block/hoistway_light",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "qwertys_elevator:block/hoistway_light",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "qwertys_elevator:block/hoistway_light",
+      "y": 270
+    }
+  }
+}

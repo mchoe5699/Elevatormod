@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "qwertys_elevator:block/governor"
+    },
+    "facing=east": {
+      "model": "qwertys_elevator:block/governor",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "qwertys_elevator:block/governor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "qwertys_elevator:block/governor",
+      "y": 270
+    }
+  }
+}

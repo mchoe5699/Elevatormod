@@ -1,0 +1,74 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "l": "qwertys_elevator:block/hoistway_light",
+    "dark": "qwertys_elevator:block/machine_dark",
+    "particle": "qwertys_elevator:block/hoistway_light"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        5,
+        14
+      ],
+      "to": [
+        12,
+        11,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dark"
+        },
+        "south": {
+          "texture": "#dark"
+        },
+        "east": {
+          "texture": "#dark"
+        },
+        "west": {
+          "texture": "#dark"
+        },
+        "up": {
+          "texture": "#dark"
+        },
+        "down": {
+          "texture": "#dark"
+        }
+      }
+    },
+    {
+      "from": [
+        4.5,
+        5.5,
+        13
+      ],
+      "to": [
+        11.5,
+        10.5,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#l"
+        },
+        "south": {
+          "texture": "#l"
+        },
+        "east": {
+          "texture": "#l"
+        },
+        "west": {
+          "texture": "#l"
+        },
+        "up": {
+          "texture": "#l"
+        },
+        "down": {
+          "texture": "#l"
+        }
+      }
+    }
+  ]
+}

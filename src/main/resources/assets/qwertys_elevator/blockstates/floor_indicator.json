@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "qwertys_elevator:block/floor_indicator"
+    },
+    "facing=east": {
+      "model": "qwertys_elevator:block/floor_indicator",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "qwertys_elevator:block/floor_indicator",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "qwertys_elevator:block/floor_indicator",
+      "y": 270
+    }
+  }
+}

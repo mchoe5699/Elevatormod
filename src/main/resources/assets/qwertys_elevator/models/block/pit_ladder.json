@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/ladder",
+  "render_type": "cutout",
+  "textures": {
+    "texture": "qwertys_elevator:block/pit_ladder",
+    "particle": "qwertys_elevator:block/pit_ladder"
+  }
+}

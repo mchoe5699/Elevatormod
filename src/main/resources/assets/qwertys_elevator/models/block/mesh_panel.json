@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_all",
+  "render_type": "cutout",
+  "textures": {
+    "all": "qwertys_elevator:block/mesh_panel"
+  }
+}

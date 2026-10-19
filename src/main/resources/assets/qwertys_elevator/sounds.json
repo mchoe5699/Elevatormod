@@ -1,0 +1,106 @@
+{
+  "chime_up": {
+    "subtitle": "subtitles.qwertys_elevator.chime_up",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:chime_up"
+      }
+    ]
+  },
+  "chime_down": {
+    "subtitle": "subtitles.qwertys_elevator.chime_down",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:chime_down"
+      }
+    ]
+  },
+  "chime_car": {
+    "subtitle": "subtitles.qwertys_elevator.chime_car",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:chime_car"
+      }
+    ]
+  },
+  "button": {
+    "subtitle": "subtitles.qwertys_elevator.button",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:button"
+      }
+    ]
+  },
+  "door_open": {
+    "subtitle": "subtitles.qwertys_elevator.door_open",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:door_open"
+      }
+    ]
+  },
+  "door_close": {
+    "subtitle": "subtitles.qwertys_elevator.door_close",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:door_close"
+      }
+    ]
+  },
+  "buzzer": {
+    "subtitle": "subtitles.qwertys_elevator.buzzer",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:buzzer"
+      }
+    ]
+  },
+  "alarm": {
+    "subtitle": "subtitles.qwertys_elevator.alarm",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:alarm"
+      }
+    ]
+  },
+  "motor_start": {
+    "subtitle": "subtitles.qwertys_elevator.motor_start",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:motor_start"
+      }
+    ]
+  },
+  "motor_run": {
+    "subtitle": "subtitles.qwertys_elevator.motor_run",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:motor_run"
+      }
+    ]
+  },
+  "brake": {
+    "subtitle": "subtitles.qwertys_elevator.brake",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:brake"
+      }
+    ]
+  },
+  "relay": {
+    "subtitle": "subtitles.qwertys_elevator.relay",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:relay"
+      }
+    ]
+  },
+  "fire_bell": {
+    "subtitle": "subtitles.qwertys_elevator.fire_bell",
+    "sounds": [
+      {
+        "name": "qwertys_elevator:fire_bell"
+      }
+    ]
+  }
+}

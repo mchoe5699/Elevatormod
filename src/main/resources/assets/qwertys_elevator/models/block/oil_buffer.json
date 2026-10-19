@@ -1,0 +1,140 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "oil": "qwertys_elevator:block/oil_buffer",
+    "dark": "qwertys_elevator:block/machine_dark",
+    "pl": "qwertys_elevator:block/stainless_mirror",
+    "black": "qwertys_elevator:block/black_plastic",
+    "particle": "qwertys_elevator:block/oil_buffer"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        2,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dark"
+        },
+        "south": {
+          "texture": "#dark"
+        },
+        "east": {
+          "texture": "#dark"
+        },
+        "west": {
+          "texture": "#dark"
+        },
+        "up": {
+          "texture": "#dark"
+        },
+        "down": {
+          "texture": "#dark"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        2,
+        4
+      ],
+      "to": [
+        12,
+        11,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#oil"
+        },
+        "south": {
+          "texture": "#oil"
+        },
+        "east": {
+          "texture": "#oil"
+        },
+        "west": {
+          "texture": "#oil"
+        },
+        "up": {
+          "texture": "#oil"
+        },
+        "down": {
+          "texture": "#oil"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        11,
+        6
+      ],
+      "to": [
+        10,
+        15,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#pl"
+        },
+        "south": {
+          "texture": "#pl"
+        },
+        "east": {
+          "texture": "#pl"
+        },
+        "west": {
+          "texture": "#pl"
+        },
+        "up": {
+          "texture": "#pl"
+        },
+        "down": {
+          "texture": "#pl"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        15,
+        4
+      ],
+      "to": [
+        12,
+        16,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#black"
+        },
+        "south": {
+          "texture": "#black"
+        },
+        "east": {
+          "texture": "#black"
+        },
+        "west": {
+          "texture": "#black"
+        },
+        "up": {
+          "texture": "#black"
+        },
+        "down": {
+          "texture": "#black"
+        }
+      }
+    }
+  ]
+}

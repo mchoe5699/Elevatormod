@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "qwertys_elevator:block/leveling_vane"
+    },
+    "facing=east": {
+      "model": "qwertys_elevator:block/leveling_vane",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "qwertys_elevator:block/leveling_vane",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "qwertys_elevator:block/leveling_vane",
+      "y": 270
+    }
+  }
+}

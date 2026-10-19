@@ -1,0 +1,41 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "p": "qwertys_elevator:block/white_panel",
+    "particle": "qwertys_elevator:block/white_panel"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        5,
+        15.5
+      ],
+      "to": [
+        13,
+        11,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#p"
+        },
+        "south": {
+          "texture": "#p"
+        },
+        "east": {
+          "texture": "#p"
+        },
+        "west": {
+          "texture": "#p"
+        },
+        "up": {
+          "texture": "#p"
+        },
+        "down": {
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

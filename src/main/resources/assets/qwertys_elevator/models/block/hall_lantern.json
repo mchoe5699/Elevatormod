@@ -1,0 +1,41 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "p": "qwertys_elevator:block/panel_stainless",
+    "particle": "qwertys_elevator:block/panel_stainless"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        10,
+        15
+      ],
+      "to": [
+        14,
+        15,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#p"
+        },
+        "south": {
+          "texture": "#p"
+        },
+        "east": {
+          "texture": "#p"
+        },
+        "west": {
+          "texture": "#p"
+        },
+        "up": {
+          "texture": "#p"
+        },
+        "down": {
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

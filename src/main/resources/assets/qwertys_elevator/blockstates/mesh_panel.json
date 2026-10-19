@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "qwertys_elevator:block/mesh_panel"
+    }
+  }
+}

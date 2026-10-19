@@ -1,0 +1,107 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "tank": "qwertys_elevator:block/hydraulic_tank",
+    "motor": "qwertys_elevator:block/machine_motor",
+    "dark": "qwertys_elevator:block/machine_dark",
+    "particle": "qwertys_elevator:block/hydraulic_tank"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        2
+      ],
+      "to": [
+        15,
+        10,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#tank"
+        },
+        "south": {
+          "texture": "#tank"
+        },
+        "east": {
+          "texture": "#tank"
+        },
+        "west": {
+          "texture": "#tank"
+        },
+        "up": {
+          "texture": "#tank"
+        },
+        "down": {
+          "texture": "#tank"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        10,
+        5
+      ],
+      "to": [
+        12,
+        15,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#motor"
+        },
+        "south": {
+          "texture": "#motor"
+        },
+        "east": {
+          "texture": "#motor"
+        },
+        "west": {
+          "texture": "#motor"
+        },
+        "up": {
+          "texture": "#motor"
+        },
+        "down": {
+          "texture": "#motor"
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        10,
+        3
+      ],
+      "to": [
+        14,
+        13,
+        5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dark"
+        },
+        "south": {
+          "texture": "#dark"
+        },
+        "east": {
+          "texture": "#dark"
+        },
+        "west": {
+          "texture": "#dark"
+        },
+        "up": {
+          "texture": "#dark"
+        },
+        "down": {
+          "texture": "#dark"
+        }
+      }
+    }
+  ]
+}

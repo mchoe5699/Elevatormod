@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "qwertys_elevator:block/guide_rail"
+    },
+    "facing=east": {
+      "model": "qwertys_elevator:block/guide_rail",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "qwertys_elevator:block/guide_rail",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "qwertys_elevator:block/guide_rail",
+      "y": 270
+    }
+  }
+}

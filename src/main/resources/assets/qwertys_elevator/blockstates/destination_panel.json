@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "qwertys_elevator:block/destination_panel"
+    },
+    "facing=east": {
+      "model": "qwertys_elevator:block/destination_panel",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "qwertys_elevator:block/destination_panel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "qwertys_elevator:block/destination_panel",
+      "y": 270
+    }
+  }
+}
