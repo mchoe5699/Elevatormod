@@ -1727,6 +1727,10 @@ public class ControllerBlockEntity extends BlockEntity {
 
     /** Test/debug helper: puts the car at a stop immediately, optionally with the doors held open. */
     public void debugPlaceAt(int stop, boolean openDoors) {
+        debugPlaceAt(stop, openDoors, true);
+    }
+
+    public void debugPlaceAt(int stop, boolean openDoors, boolean hold) {
         if (geometryDirty) rebuildGeometry();
         if (geometry.paternoster || stop < 0 || stop >= geometry.stopCount()) return;
         clearAllCalls();
@@ -1744,8 +1748,8 @@ public class ControllerBlockEntity extends BlockEntity {
             openDoorsAtStop(stop);
             door = 1;
             doorState = DoorState.OPEN;
-            doorTimer = 20 * 60;
-            doorHold = true;
+            doorTimer = hold ? 20 * 60 : (int) (settings.doorOpenSec * 20);
+            doorHold = hold;
         }
         lightOn = true;
         markSync();

@@ -210,7 +210,7 @@ public final class ClientAutoTest {
         // ride test: stand in the car, press 3, check the player arrives with the car
         server("ride_prepare", 30, s -> {
             ControllerBlockEntity c = ctrl(s, SITES.get(0));
-            if (c != null) c.debugPlaceAt(0, true);
+            if (c != null) c.debugPlaceAt(0, true, false);
         });
         server("ride_enter", 40, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
