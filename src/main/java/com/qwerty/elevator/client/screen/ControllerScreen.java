@@ -26,6 +26,7 @@ public class ControllerScreen extends BaseScreen {
     private int tab = 0;
     private int floorPage = 0;
     private int materialSlot = 0;
+    private DesignPreset designPreset = DesignPreset.APARTMENT;
     private String customMaterial = "";
     private boolean dirty;
     private int jogDir;
@@ -34,6 +35,7 @@ public class ControllerScreen extends BaseScreen {
     public ControllerScreen(BlockPos pos) {
         super(Component.translatable("gui.qwertys_elevator.controller"));
         this.pos = pos;
+        this.panelH = 254;
         ControllerBlockEntity c = controller();
         this.s = c != null ? c.getSettings().copy() : new ElevatorSettings();
         if (c != null) {
@@ -188,6 +190,11 @@ public class ControllerScreen extends BaseScreen {
         });
         label(Component.translatable("gui.qwertys_elevator.custom_hint").withStyle(ChatFormatting.GRAY), x, y + 124, 0x9AA3AA);
         cycle(Component.translatable("gui.qwertys_elevator.light_color"), x, y + 138, 170, () -> Presets.lightName(s.lightColor), d -> { s.lightColor = Presets.cycleLight(s.lightColor, d); mark(); });
+        cycle(Component.translatable("gui.qwertys_elevator.design_preset"), x, y + 160, 170, () -> designPreset.label(), d -> {
+            designPreset = Choice.cycle(designPreset, d);
+            designPreset.apply(s);
+            mark();
+        });
 
         cycle(Component.translatable("gui.qwertys_elevator.wall_back"), c2, y, 170, () -> s.wallBack.label(), d -> { s.wallBack = Choice.cycle(s.wallBack, d); mark(); });
         cycle(Component.translatable("gui.qwertys_elevator.wall_left"), c2, y + 20, 170, () -> s.wallLeft.label(), d -> { s.wallLeft = Choice.cycle(s.wallLeft, d); mark(); });
