@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " W ",
+    "ICI",
+    "III"
+  ],
+  "key": {
+    "W": {
+      "item": "qwertys_elevator:wire_rope"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "C": {
+      "item": "minecraft:clock"
+    }
+  },
+  "result": {
+    "item": "qwertys_elevator:governor",
+    "count": 1
+  }
+}

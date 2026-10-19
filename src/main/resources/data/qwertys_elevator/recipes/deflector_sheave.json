@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " I ",
+    "IWI",
+    " I "
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "W": {
+      "item": "qwertys_elevator:wire_rope"
+    }
+  },
+  "result": {
+    "item": "qwertys_elevator:deflector_sheave",
+    "count": 1
+  }
+}

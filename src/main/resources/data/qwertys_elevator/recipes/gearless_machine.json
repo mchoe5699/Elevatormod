@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IMI",
+    "WMW",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "M": {
+      "item": "qwertys_elevator:elevator_motor"
+    },
+    "W": {
+      "item": "qwertys_elevator:wire_rope"
+    }
+  },
+  "result": {
+    "item": "qwertys_elevator:gearless_machine",
+    "count": 1
+  }
+}

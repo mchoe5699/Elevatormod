@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "IMI",
+    "PKP",
+    "III"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "M": {
+      "item": "qwertys_elevator:elevator_motor"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    },
+    "K": {
+      "item": "minecraft:cauldron"
+    }
+  },
+  "result": {
+    "item": "qwertys_elevator:hydraulic_power_unit",
+    "count": 1
+  }
+}

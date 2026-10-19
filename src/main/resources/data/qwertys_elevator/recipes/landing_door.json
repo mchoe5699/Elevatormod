@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SS",
+    "SS",
+    "SO"
+  ],
+  "key": {
+    "S": {
+      "item": "qwertys_elevator:stainless_hairline"
+    },
+    "O": {
+      "item": "qwertys_elevator:door_operator"
+    }
+  },
+  "result": {
+    "item": "qwertys_elevator:landing_door",
+    "count": 6
+  }
+}

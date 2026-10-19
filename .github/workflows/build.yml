@@ -22,20 +22,16 @@ jobs:
           chmod +x gradlew
           ./gradlew build --no-daemon --stacktrace 2>&1 | tee build.log
           exit ${PIPESTATUS[0]}
-      - name: Publish build log on failure
+      - name: Report build errors
         if: failure()
         run: |
-          grep -E "error:|warning:|FAILURE|What went wrong|Exception" -A4 build.log | head -1500 > errors.txt || true
-          tail -300 build.log > tail.txt || true
-          git config user.name "ci"
-          git config user.email "ci@users.noreply.github.com"
-          git fetch origin ci-logs || true
-          git checkout --orphan ci-logs-tmp
-          git rm -rf --cached . > /dev/null
-          mkdir -p logs && cp errors.txt tail.txt logs/
-          git add logs
-          git commit -m "build log ${{ github.run_number }}"
-          git push -f origin HEAD:ci-logs
+          grep -E "error:|FAILURE|What went wrong|Exception|Could not" -A4 build.log | head -c 50000 > errors.txt || true
+          if [ ! -s errors.txt ]; then tail -c 30000 build.log > errors.txt; fi
+          msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' errors.txt)
+          echo "::error title=Build errors::$msg"
+          tail -c 20000 build.log > tail.txt
+          msg2=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' tail.txt)
+          echo "::warning title=Build log tail::$msg2"
       - uses: actions/upload-artifact@v4
         if: success()
         with:

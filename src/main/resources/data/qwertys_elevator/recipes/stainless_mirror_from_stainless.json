@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "qwertys_elevator:stainless_hairline"
+  },
+  "result": "qwertys_elevator:stainless_mirror",
+  "count": 1
+}

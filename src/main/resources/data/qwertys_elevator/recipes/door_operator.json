@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "III",
+    "PMP"
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "P": {
+      "item": "minecraft:piston"
+    },
+    "M": {
+      "item": "qwertys_elevator:elevator_motor"
+    }
+  },
+  "result": {
+    "item": "qwertys_elevator:door_operator",
+    "count": 1
+  }
+}

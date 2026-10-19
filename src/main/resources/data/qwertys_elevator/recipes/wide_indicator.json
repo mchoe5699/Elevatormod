@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "qwertys_elevator:floor_indicator"
+    },
+    {
+      "item": "qwertys_elevator:floor_indicator"
+    }
+  ],
+  "result": {
+    "item": "qwertys_elevator:wide_indicator",
+    "count": 1
+  }
+}
