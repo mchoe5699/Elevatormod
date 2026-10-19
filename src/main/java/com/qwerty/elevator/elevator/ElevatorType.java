@@ -252,7 +252,12 @@ public enum ElevatorType implements Choice {
                 s.panelStyle = PanelStyle.WHITE;
             }
         }
-        if (this != DUMBWAITER && this != PLATFORM_LIFT) s.autoCapacity();
+        if (this == HOME) {
+            s.capacityKg = 320;
+            s.capacityPersons = 4;
+        } else if (this != DUMBWAITER && this != PLATFORM_LIFT) {
+            s.autoCapacity();
+        }
         s.clamp();
     }
 }
