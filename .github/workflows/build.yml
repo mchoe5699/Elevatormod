@@ -63,13 +63,13 @@ jobs:
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-utils > /dev/null 2>&1
           mkdir -p run
-          printf "onboardAccessibility:false\ntutorialStep:none\nskipMultiplayerWarning:true\njoinedFirstServer:true\nrenderDistance:5\nsimulationDistance:8\nguiScale:2\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nfov:0.15\n" > run/options.txt
+          printf "onboardAccessibility:false\ntutorialStep:none\nskipMultiplayerWarning:true\njoinedFirstServer:true\nrenderDistance:5\nsimulationDistance:8\nguiScale:2\nnarrator:0\nsoundCategory_master:0.0\npauseOnLostFocus:false\nfov:0.15\nlang:ko_kr\n" > run/options.txt
           export LIBGL_ALWAYS_SOFTWARE=1
           set +e
           timeout 1800 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient --no-daemon -Pautotest=true > client.log 2>&1
           echo "exit $?"
           ls run/screenshots || true
-          grep -E "AUTOTEST|Exception|ERROR|Caused by|at com.qwerty|Reported exception|qwertys_elevator" client.log | grep -vE "Narrator|flite|setAccessible|netty|Suppressed|IllegalAccessException|at jdk|at java" | head -c 45000 > ct.txt
+          grep -E "AUTOTEST|Exception|ERROR|Caused by|at com.qwerty|Reported exception" client.log | grep -vE "Narrator|flite|setAccessible|netty|Suppressed|IllegalAccessException|at jdk|at java" | head -c 45000 > ct.txt
           msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' ct.txt)
           echo "::notice title=Client run::$msg"
           tail -c 15000 client.log > ctail.txt
