@@ -1711,6 +1711,38 @@ public class ControllerBlockEntity extends BlockEntity {
 
     public boolean isLandingUnlocked() { return landingUnlocked; }
 
+    /** Test/debug helper: puts the car at a stop immediately, optionally with the doors held open. */
+    public void debugPlaceAt(int stop, boolean openDoors) {
+        if (geometryDirty) rebuildGeometry();
+        if (geometry.paternoster || stop < 0 || stop >= geometry.stopCount()) return;
+        clearAllCalls();
+        s = geometry.stopS[stop];
+        v = 0;
+        dir = 0;
+        currentStop = stop;
+        targetStop = -1;
+        forcedStopRescue = -1;
+        phase = Phase.IDLE;
+        door = 0;
+        doorState = DoorState.CLOSED;
+        doorHold = false;
+        if (openDoors) {
+            openDoorsAtStop(stop);
+            door = 1;
+            doorState = DoorState.OPEN;
+            doorTimer = 20 * 60;
+            doorHold = true;
+        }
+        lightOn = true;
+        markSync();
+    }
+
+    public String debugState() {
+        return String.format("%s s=%.2f v=%.3f phase=%s stop=%d disp=%d door=%.2f mode=%s calls=%s up=%s down=%s",
+                settings.name, s, v, phase, currentStop, displayStop, door, mode,
+                Arrays.toString(carCall), Arrays.toString(hallUp), Arrays.toString(hallDown));
+    }
+
     public void logDebug() {
         ElevatorMod.LOGGER.debug("Elevator {} s={} v={} phase={} stop={}", settings.name, s, v, phase, currentStop);
     }

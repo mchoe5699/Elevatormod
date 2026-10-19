@@ -124,94 +124,100 @@ public final class ClientAutoTest {
         return level.getBlockEntity(site.controller()) instanceof ControllerBlockEntity c ? c : null;
     }
 
+    private static void forAll(MinecraftServer s, java.util.function.Consumer<ControllerBlockEntity> action) {
+        for (ShowcaseBuilder.Site site : SITES) {
+            ControllerBlockEntity c = ctrl(s, site);
+            if (c != null) action.accept(c);
+        }
+    }
+
+    private static void logStates(String when) {
+        server("log_" + when, 2, s -> forAll(s, c -> ElevatorMod.LOGGER.info("AUTOTEST [{}] {}", when, c.debugState())));
+    }
+
+    private static void inside(String name, int site, int floor, float yaw, float pitch, double dz, double dx) {
+        server("tp_" + name, 50, s -> {
+            ShowcaseBuilder.Site a = SITES.get(Math.min(site, SITES.size() - 1));
+            look(s, a.doorCenterX() + dx, a.floorY(floor) + 0.02, a.carCenterZ() + dz, yaw, pitch);
+        });
+        shot(name, 5);
+    }
+
     private static void planSteps() {
-        server("build", 200, s -> {
+        server("build", 160, s -> {
             ServerLevel level = s.overworld();
             level.setDayTime(6000);
             ServerPlayer p = player(s);
             origin = new BlockPos(p.getBlockX() + 6, 180, p.getBlockZ() + 6);
             SITES.clear();
             SITES.addAll(ShowcaseBuilder.buildAll(level, origin));
-            for (ShowcaseBuilder.Site site : SITES) {
-                ControllerBlockEntity c = ctrl(s, site);
-                if (c != null) c.registerCarCall(site.floors() - 1, null);
-            }
         });
-        // all cars to the top floor first, then the first one back to floor 1 for the landing shots
-        server("tp_landing", 160, s -> {
+        logStates("built");
+        server("park_top", 40, s -> forAll(s, c -> c.debugPlaceAt(c.getGeometry().stopCount() - 1, false)));
+        server("tp_landing", 60, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX(), a.floorY(1) + 1.6, a.landingZ() - 3.5, 0, 8);
+            look(s, a.doorCenterX(), a.floorY(1) + 0.02, a.landingZ() - 3.2, 0, 8);
         });
-        shot("01_landing_closed", 10);
-        server("call_floor1", 200, s -> {
-            for (ShowcaseBuilder.Site site : SITES) {
-                ControllerBlockEntity c = ctrl(s, site);
-                if (c != null) c.registerHallCall(1, 1);
-            }
-        });
-        shot("02_landing_open", 20);
-        server("tp_car_front", 60, s -> {
+        shot("01_landing_closed", 5);
+        server("park_floor1_open", 60, s -> forAll(s, c -> c.debugPlaceAt(Math.min(1, c.getGeometry().stopCount() - 1), true)));
+        logStates("parked");
+        shot("02_landing_open", 5);
+        inside("03_car_front", 0, 1, 180, 8, 0.5, -0.2);
+        inside("04_car_back", 0, 1, 0, 5, -0.6, 0);
+        inside("05_car_cop", 0, 1, 155, 30, -0.1, 0.5);
+        server("tp_hoistway", 50, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX() - 0.3, a.floorY(1) + 0.05, a.carCenterZ() + 0.5, 180, 10);
+            look(s, a.doorCenterX() - 4.6, a.floorY(1) - 0.5, a.carCenterZ() + 0.4, -90, 0);
         });
-        shot("03_car_front", 10);
-        server("tp_car_back", 60, s -> {
+        shot("06_hoistway_side", 5);
+        server("tp_pit", 50, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX(), a.floorY(1) + 0.05, a.carCenterZ() - 0.6, 0, 5);
+            look(s, a.doorCenterX() - 4.6, a.floorY(0) - 2.0, a.carCenterZ() + 0.4, -90, -15);
         });
-        shot("04_car_back", 10);
-        server("tp_cop", 60, s -> {
+        shot("07_pit", 5);
+        server("tp_machine", 50, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX() + 0.6, a.floorY(1) + 0.1, a.carCenterZ() - 0.2, 160, 25);
+            look(s, a.doorCenterX() - 3.5, a.machineY() + 0.5, a.carCenterZ() - 3, -45, 20);
         });
-        shot("05_car_cop", 10);
-        server("tp_hoistway", 60, s -> {
-            ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX() - 4.5, a.floorY(1) - 1.5, a.carCenterZ() + 0.5, -90, -25);
-        });
-        shot("06_hoistway_side", 10);
-        server("tp_pit", 60, s -> {
-            ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX() - 4.5, a.floorY(0) - 1.0, a.carCenterZ() + 0.5, -90, -10);
-        });
-        shot("07_pit", 10);
-        server("tp_machine", 60, s -> {
-            ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX() - 3.5, a.machineY() + 1.5, a.carCenterZ() - 3, -45, 25);
-        });
-        shot("08_machine_room", 10);
-        server("send_car_up", 30, s -> {
+        shot("08_machine_room", 5);
+        server("send_car_up", 2, s -> {
             ControllerBlockEntity c = ctrl(s, SITES.get(0));
-            if (c != null) c.registerCarCall(2, null);
+            if (c != null) { c.debugPlaceAt(0, false); c.registerCarCall(2, null); }
         });
-        server("tp_moving", 30, s -> {
+        server("tp_moving", 90, s -> {
             ShowcaseBuilder.Site a = SITES.get(0);
-            look(s, a.doorCenterX() - 4.5, a.floorY(1) + 1.5, a.carCenterZ() + 0.5, -90, -5);
+            look(s, a.doorCenterX() - 4.6, a.floorY(0) + 2.5, a.carCenterZ() + 0.4, -90, 0);
         });
-        shot("09_car_moving", 10);
-        for (int i = 1; i < 11; i++) {
+        logStates("moving");
+        shot("09_car_moving", 5);
+        for (int i = 1; i < ShowcaseBuilder.TYPES.length; i++) {
             final int idx = i;
-            server("tp_type_" + i, 70, s -> {
-                if (idx >= SITES.size()) return;
+            String id = ShowcaseBuilder.TYPES[i].id();
+            server("tp_type_" + i, 50, s -> {
                 ShowcaseBuilder.Site site = SITES.get(idx);
-                look(s, site.doorCenterX() + 0.8, site.floorY(1) + 1.6, site.landingZ() - 3.8, 12, 12);
+                look(s, site.doorCenterX() + 0.5, site.floorY(1) + 0.02, site.landingZ() - 3.4, 10, 10);
             });
-            shot(String.format("%02d_type_%s", 10 + i, i < ShowcaseBuilder.TYPES.length ? ShowcaseBuilder.TYPES[i].id() : "x"), 10);
+            shot(String.format("%02d_%s_landing", 10 + i, id), 5);
+            if (ShowcaseBuilder.TYPES[i] != ElevatorType.PATERNOSTER) {
+                inside(String.format("%02d_%s_inside", 10 + i, id), idx, 1, 180, 10, 0.35, 0);
+                inside(String.format("%02d_%s_back", 10 + i, id), idx, 1, 0, 5, -0.3, 0);
+            }
         }
-        server("tp_overview", 80, s -> {
+        server("tp_overview", 70, s -> {
             ShowcaseBuilder.Site first = SITES.get(0);
             ShowcaseBuilder.Site last = SITES.get(SITES.size() - 1);
             double cx = (first.doorCenterX() + last.doorCenterX()) / 2;
-            look(s, cx, first.floorY(1) + 8, first.landingZ() - 40, 0, 12);
+            look(s, cx, first.floorY(1) + 8, first.landingZ() - 45, 0, 12);
         });
-        shot("30_overview", 10);
-        server("tp_overview_back", 80, s -> {
+        shot("30_overview", 5);
+        server("tp_overview_back", 70, s -> {
             ShowcaseBuilder.Site first = SITES.get(0);
             ShowcaseBuilder.Site last = SITES.get(SITES.size() - 1);
             double cx = (first.doorCenterX() + last.doorCenterX()) / 2;
-            look(s, cx, first.floorY(1) + 6, first.carCenterZ() + 30, 180, 10);
+            look(s, cx, first.floorY(1) + 6, first.carCenterZ() + 35, 180, 10);
         });
-        shot("31_overview_back", 10);
+        shot("31_overview_back", 5);
+        logStates("end");
     }
 
     @SuppressWarnings("unused")
