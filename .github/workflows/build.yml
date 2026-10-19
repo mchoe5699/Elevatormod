@@ -24,7 +24,8 @@ jobs:
           exit ${PIPESTATUS[0]}
       - name: Compiler errors
         if: failure()
-        run: grep -E "error:|warning: \[removal\]|FAILURE|What went wrong" -A3 build.log | head -400 || true
+        run: |
+          grep -E "error:|FAILURE|What went wrong" -A3 build.log | head -400 || true
       - uses: actions/upload-artifact@v4
         if: success()
         with:
