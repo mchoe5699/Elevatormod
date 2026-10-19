@@ -45,3 +45,13 @@ jobs:
           name: Build ${{ github.run_number }}
           files: build/libs/*.jar
           prerelease: true
+      - name: Game tests
+        if: success()
+        run: |
+          set +e
+          timeout 1500 ./gradlew runGameTestServer --no-daemon > gametest.log 2>&1
+          code=$?
+          grep -E "GameTest|gametest|failed|passed|Exception|ERROR|Error|Caused by|at com.qwerty" gametest.log | grep -v "DEBUG" | head -c 50000 > gt.txt
+          msg=$(sed ':a;N;$!ba;s/%/%25/g;s/\r/%0D/g;s/\n/%0A/g' gt.txt)
+          if [ $code -ne 0 ]; then echo "::error title=Game tests::exit $code%0A$msg"; else echo "::notice title=Game tests::$msg"; fi
+          exit $code
