@@ -556,6 +556,11 @@ public class ControllerBlockEntity extends BlockEntity {
         if (settings.autoNames) for (Floor f : floors) f.customName = false;
         renameFloors();
         if (typeChanged) {
+            for (Floor fo : floors) {
+                for (BlockPos p : new BlockPos[]{fo.front, fo.rear}) {
+                    if (p != null && level != null && level.getBlockEntity(p) instanceof LandingDoorBlockEntity d) d.setOpen(0f);
+                }
+            }
             respawnCar();
             s = geometry.stopCount() > 0 ? geometry.stopS[0] : 0;
             v = 0;
